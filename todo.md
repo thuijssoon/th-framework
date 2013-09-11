@@ -3,9 +3,9 @@
 # Fix errors
 1. fix small image field problems (done)
 2. fix map issues in terms (done)
-    2.1 Marker lat / lng
-    2.2 Zoom
-    2.3 Map Center lat / lng
+ 2.1. Marker lat / lng
+ 2.2. Zoom
+ 2.3. Map Center lat / lng
 3. fix css issues in terms (done)
 4. fix oembed fields (done)
 5. fix sizing of fields (select fields)
