@@ -1,0 +1,8 @@
+.select2-container-multi.widefat {
+	border: none !important;
+}
+.select2-choices {
+	background-image: none !important;
+	background-color: #ffffff !important;
+	border-color: #dfdfdf !important;
+}
