@@ -1,3 +1,6 @@
+# Project specific files to ignore
+CPT Requirements.txt
+
 # Numerous always-ignore extensions
 *.diff
 *.err
