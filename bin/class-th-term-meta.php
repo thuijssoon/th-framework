@@ -68,6 +68,10 @@ if ( !class_exists( 'TH_Term_Meta' ) ) {
 				add_filter( 'manage_' . $taxonomy . '_custom_column', array( $this, 'populate_column' ), 10, 3 );
 			}
 
+			// Setup hooks for broadcasting
+			add_filter( 'th_mba_create_term_meta_broadcast_data', array( $this, 'pre_process_cloned_meta' ) );
+			add_filter( 'th_mba_term_publish_meta', array( $this, 'post_process_cloned_meta' ) );
+
 			$this->admin_pages = array('edit-tags.php');
 		}
 
@@ -217,6 +221,49 @@ if ( !class_exists( 'TH_Term_Meta' ) ) {
 
 			$value = $this->get_value($slug, $term_id);
 			echo $field->get_column_value($value);
+		}
+
+		public function pre_process_cloned_meta( $term_meta_broadcast_data ) {
+			return $this->process_cloned_meta( $term_meta_broadcast_data, true );
+		}
+
+		public function post_process_cloned_meta( $term_meta_broadcast_data ) {
+			return $this->process_cloned_meta( $term_meta_broadcast_data, false );
+		}
+
+		private function process_cloned_meta( $term_meta_broadcast_data, $pre = true ) {
+				// Loop through the fields and render them
+				$fo   = $this->get_field_objects();
+				$tmbd = $term_meta_broadcast_data;
+
+				if ( 'single' === $this->meta['save_mode'] ) {
+					$temp_meta = array();
+					if(isset($term_meta_broadcast_data[$this->meta['id']])) {
+						$meta = $term_meta_broadcast_data[$this->meta['id']];
+						foreach ($meta as $meta_key => $meta_value) {
+							if( isset( $fo[$meta_key] ) ) {
+								if( $pre ) {
+									$temp_meta[$meta_key] = $fo[$meta_key]->get_source_clonable_value( $meta_value );
+								} else {
+									$temp_meta[$meta_key] = $fo[$meta_key]->get_destination_clonable_value( $meta_value );
+								}
+							}
+						}
+					}
+					$tmbd[$this->meta['id']] = $temp_meta;
+				} else {
+					foreach ($term_meta_broadcast_data as $meta_key => $meta_value) {
+						if( isset( $fo[$meta_key] ) ) {
+							if( $pre ) {
+								$tmbd[$key] = $fo[$meta_key]->get_source_clonable_value( $meta_value );
+							} else {
+								$tmbd[$key] = $fo[$meta_key]->get_destination_clonable_value( $meta_value );
+							}
+						}
+					}
+				}
+
+				return $tmbd;
 		}
 
 		private function get_value( $slug, $term_id ) {

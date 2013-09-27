@@ -68,21 +68,21 @@ if ( !class_exists( 'TH_Meta_Field_File' ) ) {
 					$icon                = wp_get_attachment_image_src( $value, 'thumbnail', true );
 				}
 
-				$date                = date_i18n(get_option('date_format') ,strtotime($attachment->post_date));
-				$filename            = basename ( get_attached_file( $value ) );
+				$date                = date_i18n( get_option( 'date_format' ) , strtotime( $attachment->post_date ) );
+				$filename            = basename( get_attached_file( $value ) );
 				$title               = sprintf( __( 'View %s in new window', 'text_domain' ), $filename );
 				$mime                = get_post_mime_type( $value );
-				$file_info           = '<div class="thumbnail"><img src="' . $icon[0] . '" class="icon" draggable="false" /></div>'; 
-				$file_info          .= '<div class="details"><div class="filename"><a href="' . $link . '" target="_blank" title="' . $title . '">' . $filename . '</a></div>'; 
-				$file_info          .= '<div class="uploaded">' . $date . '</div>'; 
+				$file_info           = '<div class="thumbnail"><img src="' . $icon[0] . '" class="icon" draggable="false" /></div>';
+				$file_info          .= '<div class="details"><div class="filename"><a href="' . $link . '" target="_blank" title="' . $title . '">' . $filename . '</a></div>';
+				$file_info          .= '<div class="uploaded">' . $date . '</div>';
 				if ( $is_image ) {
-					$file_info          .= '<div class="dimension">' . $full[1] . ' x ' . $full[2] . '</div>'; 
+					$file_info          .= '<div class="dimension">' . $full[1] . ' x ' . $full[2] . '</div>';
 				}
-				$file_info          .= '<div class="mimetype">' . $mime . '</div>'; 
-				$file_info          .= '</div>'; 
+				$file_info          .= '<div class="mimetype">' . $mime . '</div>';
+				$file_info          .= '</div>';
 
-				$attributes[]        = 'value="' . esc_url($link) . '"';
-				$hidden_attributes[] = 'value="' . absint($value) . '"';
+				$attributes[]        = 'value="' . esc_url( $link ) . '"';
+				$hidden_attributes[] = 'value="' . absint( $value ) . '"';
 			}
 			// Class
 			if ( !empty( $this->properties['class'] ) ) {
@@ -147,9 +147,9 @@ if ( !class_exists( 'TH_Meta_Field_File' ) ) {
 
 			if ( $this->is_required() && empty( $value ) ) {
 				$errors[$this->get_slug()] = array(
-						'slug'        => $this->get_slug(),
-						'title'       => esc_html( $this->properties['label'] ),
-						'message'     => $error_messages['required']
+					'slug'        => $this->get_slug(),
+					'title'       => esc_html( $this->properties['label'] ),
+					'message'     => $error_messages['required']
 				);
 			}
 
@@ -162,13 +162,13 @@ if ( !class_exists( 'TH_Meta_Field_File' ) ) {
 		}
 
 		public function get_column_value( $value ) {
-			if ( empty($value)) {
+			if ( empty( $value ) ) {
 				$att = wp_get_attachment_image_src( 0, array( 80, 60 ), true );
 				return '<img src="' . $att[0] . '" width="' . $att[1] . '" height="' . $att[2] . '" />';
-			} elseif (wp_attachment_is_image( $value )) {
+			} elseif ( wp_attachment_is_image( $value ) ) {
 				return wp_get_attachment_image( $value, array( 80, 60 ), true );
 			} else {
-				$filename = basename ( get_attached_file( $value ) );
+				$filename = basename( get_attached_file( $value ) );
 				$link     = wp_get_attachment_url( $value );
 				$title    = sprintf( __( 'View %s in new window', 'text_domain' ), $filename );
 				return '<a href="' . $link . '" target="_blank" title="' . $title . '">' . $filename . '</a>';
@@ -178,8 +178,25 @@ if ( !class_exists( 'TH_Meta_Field_File' ) ) {
 		public static function enqueue_js() {
 			wp_enqueue_media();
 			wp_enqueue_script( 'th-meta-field-file', plugins_url( 'js/th-meta-field-file.js' , dirname( __FILE__ ) ), array( 'jquery' ), '1.0.0', true );
-			$args = array('link_title' => __('Open %s in new window.', 'text_domain'));
+			$args = array( 'link_title' => __( 'Open %s in new window.', 'text_domain' ) );
 			wp_localize_script( 'th-meta-field-file', 'th_meta_field_file_args', $args );
 		}
+
+		public function get_source_clonable_value( $value ) {
+			$bapi = TH_Multisite_Broadcast_API::get_instance();
+			$attachment = get_post( $value );
+			if ( !is_null( $attachment ) ) {
+				return $bapi->create_post_broadcast_data( $attachment );
+			}
+		}
+
+		public function get_destination_clonable_value( $value ) {
+			$bapi = TH_Multisite_Broadcast_API::get_instance();
+
+			$id = $bapi->publish_attachment_data_to_blog( $value, array( 'insert_only' => true ) );
+
+			return $id;
+		}
+
 	}
 }
