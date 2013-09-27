@@ -166,6 +166,15 @@ if ( !class_exists( 'TH_CT' ) ) {
 
 			add_action( 'init', array( $this, 'acb_init_taxonomy_init' ), 0 );
 
+			// Replace the description field with an editor
+			add_action( 'admin_print_footer_scripts', array( $this, 'acb_admin_print_footer_scripts_hide_description' ), 0 );
+			add_action( $taxonomy_name . '_add_form_fields', array( $this, 'acb_replace_description_with_wysiwyg' ), 0 );
+			add_action( $taxonomy_name . '_edit_form_fields', array( $this, 'acb_replace_description_with_wysiwyg_table' ), 0 );
+			remove_filter( 'pre_term_description', 'wp_filter_kses' );
+			remove_filter( 'term_description', 'wp_kses_data' );
+			add_filter( 'pre_term_description', 'wp_filter_post_kses' );
+			add_filter( 'term_description', 'wp_kses_post' );
+			
 			// Store $this in static instances array for easy access
 			// without polluting the global namespace.
 			self::$instances[ $taxonomy_name ] = $this;
@@ -947,6 +956,64 @@ SQL;
 			wp_enqueue_script(  'select2-sortable', plugins_url( '/lib/select2-sortable/select2.sortable.js', dirname( __FILE__ ) ), array( 'jquery', 'jquery-ui-sortable', 'select2' ), '1.0' );
 			wp_enqueue_script(  'th-ct-admin-post', plugins_url( '/js/th-ct-admin-post.js' ,  __FILE__  ), array( 'select2-sortable' ), '1.0' );
 			wp_enqueue_style( 'select2', plugins_url( '/lib/select2/select2.css' , dirname( __FILE__ )  ) );
+		}
+
+		public function acb_replace_description_with_wysiwyg() {
+?>
+<div class="form-field">
+	<label for="tag-description"><?php _ex('Description', 'Taxonomy Description'); ?></label>
+	<?php wp_editor( '', 'tag-description', array('textarea_name' => 'description', 'textarea_rows' => 5, 'teeny' => true ) ); ?> 
+	<p><?php _e('The description is not prominent by default; however, some themes may show it.'); ?></p>
+</div>
+<?php			
+		}
+
+		public function acb_replace_description_with_wysiwyg_table() {
+			global $tag;
+?>
+		<tr class="form-field">
+			<th scope="row" valign="top"><label for="description"><?php _ex('Description', 'Taxonomy Description'); ?></label></th>
+			<td><?php wp_editor( htmlspecialchars_decode( $tag->description ), 'description', array('textarea_name' => 'description', 'textarea_rows' => 5, 'teeny' => true ) ); ?><br />
+			<span class="description"><?php _e('The description is not prominent by default; however, some themes may show it.'); ?></span></td>
+		</tr>
+<?php			
+		}
+
+		public function acb_admin_print_footer_scripts_hide_description() {
+			$screen = get_current_screen();
+
+			if ( 'edit-tags' !== $screen->base || $screen->taxonomy !== $this->taxonomy_name ) {
+				return;
+			}
+
+			if( isset( $_GET['tag_ID'] ) ) {
+?>
+			<script type="text/javascript">
+				jQuery(document).ready(function($){
+					$('#description').parent().parent().remove();
+				});
+			</script>
+<?php
+			} else {
+?>
+			<script type="text/javascript">
+				jQuery(document).ready(function($){
+					$('#submit').mousedown( function() {
+					    tinyMCE.triggerSave();
+				    });
+					$('#tag-description').parent().remove();
+					$(document).ajaxSuccess(function(event, xhr, settings) {
+						if ( settings.data.indexOf("action=add-tag") !== -1 ) {
+							// var length = tinymce.editors.length;
+							for (i=0; i < tinymce.editors.length; i++){
+								tinymce.editors[i].setContent(''); // get the content
+							}
+						}
+					});
+				});
+			</script>
+<?php
+			}
 		}
 
 
