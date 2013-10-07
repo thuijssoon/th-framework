@@ -186,15 +186,14 @@ if ( !class_exists( 'TH_Meta_Field_File' ) ) {
 			$bapi = TH_Multisite_Broadcast_API::get_instance();
 			$attachment = get_post( $value );
 			if ( !is_null( $attachment ) ) {
-				return $bapi->create_post_broadcast_data( $attachment );
+				$broadcast_data = $bapi->create_post_broadcast_data( $attachment );
+				return $broadcast_data;
 			}
 		}
 
 		public function get_destination_clonable_value( $value ) {
 			$bapi = TH_Multisite_Broadcast_API::get_instance();
-
 			$id = $bapi->publish_attachment_data_to_blog( $value, array( 'insert_only' => true ) );
-
 			return $id;
 		}
 

@@ -69,8 +69,8 @@ if ( !class_exists( 'TH_Term_Meta' ) ) {
 			}
 
 			// Setup hooks for broadcasting
-			add_filter( 'th_mba_create_term_meta_broadcast_data', array( $this, 'pre_process_cloned_meta' ) );
-			add_filter( 'th_mba_term_publish_meta', array( $this, 'post_process_cloned_meta' ) );
+			add_filter( 'th_mba_create_term_meta_broadcast_data', array( $this, 'pre_process_cloned_meta' ), 10, 2 );
+			add_filter( 'th_mba_term_publish_meta', array( $this, 'post_process_cloned_meta' ), 10, 2 );
 
 			$this->admin_pages = array('edit-tags.php');
 		}
@@ -223,15 +223,16 @@ if ( !class_exists( 'TH_Term_Meta' ) ) {
 			echo $field->get_column_value($value);
 		}
 
-		public function pre_process_cloned_meta( $term_meta_broadcast_data ) {
-			return $this->process_cloned_meta( $term_meta_broadcast_data, true );
+		public function pre_process_cloned_meta( $term_meta_broadcast_data, $term ) {
+			return $this->process_cloned_meta( $term_meta_broadcast_data, $term, true );
 		}
 
-		public function post_process_cloned_meta( $term_meta_broadcast_data ) {
-			return $this->process_cloned_meta( $term_meta_broadcast_data, false );
+		public function post_process_cloned_meta( $term_meta_broadcast_data, $term ) {
+			return $this->process_cloned_meta( $term_meta_broadcast_data, $term, false );
 		}
 
-		private function process_cloned_meta( $term_meta_broadcast_data, $pre = true ) {
+		private function process_cloned_meta( $term_meta_broadcast_data, $term, $pre = true ) {
+
 				// Loop through the fields and render them
 				$fo   = $this->get_field_objects();
 				$tmbd = $term_meta_broadcast_data;
