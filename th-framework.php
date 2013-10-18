@@ -78,6 +78,7 @@ function th_framework_load() {
 		require_once 'bin/class-th-post-meta.php';
 		require_once 'bin/class-th-term-meta.php';
 		require_once 'bin/class-wptp-error.php';
+		require_once 'bin/class-th-util.php';
 
 		// Do action:
 		do_action( 'th_framework_loaded' );
