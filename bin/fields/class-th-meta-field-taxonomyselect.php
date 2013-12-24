@@ -17,9 +17,10 @@ class TH_Meta_Field_Taxonomyselect extends TH_Meta_Field_Select {
 	public function __construct( $namespace, $properties ) {
 		$this->handle_defaults(
 			array(
-				'taxonomy'   => 'catagory',
-				'id_or_slug' => 'slug',
-				'args'       => array(
+				'taxonomy'     => 'catagory',
+				'save_as_meta' => false,
+				'id_or_slug'   => 'slug',
+				'args'         => array(
 					'hide_empty' => false, 
 				)
 			)
@@ -98,4 +99,13 @@ class TH_Meta_Field_Taxonomyselect extends TH_Meta_Field_Select {
 		return esc_html( $term->name );
 	}
 
+	/**
+	 * Overwrite function to allow for taxonomies to be saved as meta.
+	 */
+	public function is_taxonomy() {
+		if( $this->properties['save_as_meta'] ) {
+			return false;
+		}
+		return true;
+	}
 }
