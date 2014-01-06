@@ -1,0 +1,10 @@
+div.tab-container.tab-container-active {
+	display: block;
+}
+div.tab-container {
+	display: none;
+}
+p.submit input.button-primary,
+p.submit input.button-secondary {
+	margin-right: 20px; 
+}
