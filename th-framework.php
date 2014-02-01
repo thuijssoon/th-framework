@@ -80,6 +80,7 @@ function th_framework_load() {
 		require_once 'bin/class-wptp-error.php';
 		require_once 'bin/class-th-util.php';
 		require_once 'bin/class-th-settings-api.php';
+		require_once 'bin/class-th-shortcode.php';
 
 		// Do action:
 		do_action( 'th_framework_loaded' );
