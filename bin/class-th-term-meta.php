@@ -34,7 +34,7 @@ if ( !class_exists( 'TH_Term_Meta' ) ) {
 			}
 
 			include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
-			If (!is_plugin_active('taxonomy-metadata/taxonomy-metadata.php')) {
+			If (!class_exists('Taxonomy_Metadata')) {
 				if ( WP_DEBUG ) {
 					trigger_error( __( '<strong>Taxonomy metadata plugin is not active.</strong> You\'ll need to install and activate it in order to use this file. If you need help installing the plugin you can refer to <a href="http://wordpress.org/plugins/taxonomy-metadata/">the Taxonomy Metadata plugin in the WordPress Plugin Directory</a>.', 'text_domain' ) );
 				}
