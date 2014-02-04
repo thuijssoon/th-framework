@@ -8,3 +8,6 @@ p.submit input.button-primary,
 p.submit input.button-secondary {
 	margin-right: 20px; 
 }
+.wp-editor-area {
+	/*min-height: 400px;*/
+}

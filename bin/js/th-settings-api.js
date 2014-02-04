@@ -22,23 +22,22 @@ jQuery(function(){
 	    return results[1] || 0;
 	}
 	
-	var tabs = jQuery('h2.nav-tab-wrapper a.nav-tab');
-	var tabcontainers = jQuery('div.tab-container');
-	var use_ajax = jQuery('<input type="hidden" value="true" name="' + th_settings.option_key + '[using_ajax]">');
-	jQuery('form').append( use_ajax );
+    // var tabs = jQuery('h2.nav-tab-wrapper a.nav-tab');
+    // var tabcontainers = jQuery('div.tab-container');
+    // var use_ajax = jQuery('<input type="hidden" value="true" name="' + th_settings.option_key + '[using_ajax]">');
+    // jQuery('form').append( use_ajax );
 
-    jQuery(tabs).click(function () {
-	   	id = '#' + urlParam( 'tab', this.href ) + '-container';
-        // hide all tabs
-        jQuery(tabcontainers).removeClass('tab-container-active').hide();
-        jQuery(tabcontainers).filter( jQuery( id ) ).fadeIn();
-        
-        // set up the selected class
-        jQuery(tabs).removeClass('nav-tab-active');
-        jQuery(this).addClass('nav-tab-active');
-        
-        this.blur();
-        return false;
-    });
-	
+    //    jQuery(tabs).click(function () {
+    //    	id = '#' + urlParam( 'tab', this.href ) + '-container';
+    //        // hide all tabs
+    //        jQuery(tabcontainers).removeClass('tab-container-active').hide();
+    //        jQuery(tabcontainers).filter( jQuery( id ) ).fadeIn();
+
+    //        // set up the selected class
+    //        jQuery(tabs).removeClass('nav-tab-active');
+    //        jQuery(this).addClass('nav-tab-active');
+
+    //        this.blur();
+    //        return false;
+    //    });
 });
