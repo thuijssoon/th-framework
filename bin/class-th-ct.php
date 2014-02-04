@@ -585,6 +585,12 @@ if ( !class_exists( 'TH_CT' ) ) {
 		public function fcb_manage_post_columns_add_taxonomy( $columns ) {
 
 			$post_type = get_current_screen()->post_type;
+
+			// Cater for ajax requests following quick edit update.
+			if(empty($post_type)) {
+				$post_type = $_POST['post_type'];
+			}
+
 			$column_args = $this->show_column_for_types[$post_type];
 
 			// Insert the column after the last taxonomy column
@@ -630,7 +636,8 @@ if ( !class_exists( 'TH_CT' ) ) {
 		public function acb_manage_posts_custom_column_add_taxonomy( $column, $post_id ) {
 			if ( 'tax-' . $this->taxonomy_name == $column ) {
 				$screen  = get_current_screen();
-				$type    = $screen->post_type;
+				$type    = get_post_type( $post_id );
+
 				$terms   = wp_get_object_terms( $post_id, $this->taxonomy_name, array( 'orderby' => 'term_order',  'fields' => 'all' ) );
 				$label   = get_post_type_object( $type )->labels->name;
 
