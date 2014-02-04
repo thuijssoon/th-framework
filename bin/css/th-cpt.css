@@ -123,8 +123,9 @@ tr.th-meta input.text_large, tr.th-meta select.text_large  { width: 400px; max-w
 tr.th-meta td.th_file_cell input { width: 60%; }
 
 /* Editor */
-tr.th-meta .mceIframeContainer {background:#FFF; }
+tr.th-meta .mceIframeContainer { background:#FFF; }
 tr.th-meta .wp-editor-wrap { width:95%; }
+.edit-tags-php .th_editor_cell input { width: auto; }
 
 /* OEMBED */
 tr.th-meta .th-oembed-container {  margin: 10px 0 0 0;}
