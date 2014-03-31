@@ -4,6 +4,10 @@
     "license": "GPL",
 	"version": "master",
     "type": "wordpress-plugin",    
+    "dist": {
+        "url": "git@github.com:thuijssoon/th-framework.git",
+        "type": "git"
+    },
     "require": {
 	    "php": ">=5.3.2",
 	    "wordpress": ">=3.8"
