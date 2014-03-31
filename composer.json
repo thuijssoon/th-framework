@@ -2,7 +2,10 @@
     "name": "thijshuijssoon/th-framework",
     "description": "Framework for WordPress plugin development.",
     "license": "GPL",
+	"version": "master",
+    "type": "wordpress-plugin",    
     "require": {
-
+	    "php": ">=5.3.2",
+	    "wordpress": ">=3.8"
     }
 }
