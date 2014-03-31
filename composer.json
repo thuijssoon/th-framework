@@ -1,0 +1,8 @@
+{
+    "name": "thijshuijssoon/th-framework",
+    "description": "Framework for WordPress plugin development.",
+    "license": "GPL",
+    "require": {
+
+    }
+}
