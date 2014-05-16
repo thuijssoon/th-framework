@@ -69,10 +69,13 @@ if ( !class_exists( 'TH_Term_Meta' ) ) {
 			}
 
 			// Setup hooks for broadcasting
-			add_filter( 'th_mba_create_term_meta_broadcast_data', array( $this, 'pre_process_cloned_meta' ), 10, 2 );
-			add_filter( 'th_mba_term_publish_meta', array( $this, 'post_process_cloned_meta' ), 10, 2 );
+			// add_filter( 'th_mba_create_term_meta_broadcast_data', array( $this, 'pre_process_cloned_meta' ), 10, 2 );
+			// add_filter( 'th_mba_term_publish_meta', array( $this, 'post_process_cloned_meta' ), 10, 2 );
 
 			$this->admin_pages = array('edit-tags.php');
+
+			add_action( 'mcc_term_copied', array( $this, 'handle_mcc_term_copied'), 10, 3 );
+			add_action( 'mcc_before_copy_post', array( $this, 'suppress_hooks_before_copy') );
 		}
 
 		public function render() {
@@ -223,49 +226,80 @@ if ( !class_exists( 'TH_Term_Meta' ) ) {
 			echo $field->get_column_value($value);
 		}
 
-		public function pre_process_cloned_meta( $term_meta_broadcast_data, $term ) {
-			return $this->process_cloned_meta( $term_meta_broadcast_data, $term, true );
+		public function suppress_hooks_before_copy() {
+			self::suppress_hooks();
+			WPTP_Error::suppress_hooks();
 		}
 
-		public function post_process_cloned_meta( $term_meta_broadcast_data, $term ) {
-			return $this->process_cloned_meta( $term_meta_broadcast_data, $term, false );
-		}
+		public function handle_mcc_term_copied($source_term_id, $destination_term, $source_blog_id ) {
+			// Get the source post
+			$current_blog_id = get_current_blog_id();
+			switch_to_blog( $source_blog_id );
+			$source_term_meta = maybe_unserialize(get_term_meta( $source_term_id ));
+			switch_to_blog( $current_blog_id );
 
-		private function process_cloned_meta( $term_meta_broadcast_data, $term, $pre = true ) {
-
-				// Loop through the fields and render them
-				$fo   = $this->get_field_objects();
-				$tmbd = $term_meta_broadcast_data;
-
-				if ( 'single' === $this->meta['save_mode'] ) {
-					$temp_meta = array();
-					if(isset($term_meta_broadcast_data[$this->meta['id']])) {
-						$meta = $term_meta_broadcast_data[$this->meta['id']];
-						foreach ($meta as $meta_key => $meta_value) {
-							if( isset( $fo[$meta_key] ) ) {
-								if( $pre ) {
-									$temp_meta[$meta_key] = $fo[$meta_key]->get_source_clonable_value( $meta_value );
-								} else {
-									$temp_meta[$meta_key] = $fo[$meta_key]->get_destination_clonable_value( $meta_value );
-								}
-							}
-						}
-					}
-					$tmbd[$this->meta['id']] = $temp_meta;
-				} else {
-					foreach ($term_meta_broadcast_data as $meta_key => $meta_value) {
-						if( isset( $fo[$meta_key] ) ) {
-							if( $pre ) {
-								$tmbd[$key] = $fo[$meta_key]->get_source_clonable_value( $meta_value );
-							} else {
-								$tmbd[$key] = $fo[$meta_key]->get_destination_clonable_value( $meta_value );
-							}
-						}
-					}
+			foreach ($source_term_meta as $meta_key => $meta_values) {
+				if( !$this->is_our_meta( $meta_key ) ) {
+					continue;
 				}
 
-				return $tmbd;
+				foreach ($meta_values as $meta_value) {
+					$meta_value = maybe_unserialize( $meta_value);
+
+					// Get the new value
+					remove_action( 'mcc_term_copied', array( $this, 'handle_mcc_term_copied' ), 10, 3 );
+					$new_meta_value = $this->process_cloned_meta( $source_blog_id, $source_term_id, $destination_term['term_id'], $meta_key, $meta_value );
+					add_action( 'mcc_term_copied', array( $this, 'handle_mcc_term_copied' ), 10, 3 );
+
+					// Save the meta
+					update_term_meta( $destination_term['term_id'], $meta_key, $new_meta_value );
+				}
+			}
 		}
+
+		// public function pre_process_cloned_meta( $term_meta_broadcast_data, $term ) {
+		// 	return $this->process_cloned_meta( $term_meta_broadcast_data, $term, true );
+		// }
+
+		// public function post_process_cloned_meta( $term_meta_broadcast_data, $term ) {
+		// 	return $this->process_cloned_meta( $term_meta_broadcast_data, $term, false );
+		// }
+
+		// private function process_cloned_meta( $term_meta_broadcast_data, $term, $pre = true ) {
+
+		// 		// Loop through the fields and render them
+		// 		$fo   = $this->get_field_objects();
+		// 		$tmbd = $term_meta_broadcast_data;
+
+		// 		if ( 'single' === $this->meta['save_mode'] ) {
+		// 			$temp_meta = array();
+		// 			if(isset($term_meta_broadcast_data[$this->meta['id']])) {
+		// 				$meta = $term_meta_broadcast_data[$this->meta['id']];
+		// 				foreach ($meta as $meta_key => $meta_value) {
+		// 					if( isset( $fo[$meta_key] ) ) {
+		// 						if( $pre ) {
+		// 							$temp_meta[$meta_key] = $fo[$meta_key]->get_source_clonable_value( $meta_value );
+		// 						} else {
+		// 							$temp_meta[$meta_key] = $fo[$meta_key]->get_destination_clonable_value( $meta_value );
+		// 						}
+		// 					}
+		// 				}
+		// 			}
+		// 			$tmbd[$this->meta['id']] = $temp_meta;
+		// 		} else {
+		// 			foreach ($term_meta_broadcast_data as $meta_key => $meta_value) {
+		// 				if( isset( $fo[$meta_key] ) ) {
+		// 					if( $pre ) {
+		// 						$tmbd[$key] = $fo[$meta_key]->get_source_clonable_value( $meta_value );
+		// 					} else {
+		// 						$tmbd[$key] = $fo[$meta_key]->get_destination_clonable_value( $meta_value );
+		// 					}
+		// 				}
+		// 			}
+		// 		}
+
+		// 		return $tmbd;
+		// }
 
 		private function get_value( $slug, $term_id ) {
 			if ( 'single' == $this->meta['save_mode'] ) {

@@ -265,6 +265,58 @@ if ( !class_exists( 'TH_Meta' ) ) {
 			return $this->field_classes;
 		}
 
+		protected function is_our_meta( $meta_key ) {
+			if('single' === $this->meta['save_mode']) {
+				return $meta_key === $this->meta['id'];
+			}
+			$field_objects = $this->get_field_objects();
+
+			foreach ($field_objects as $key => $value) {
+				if ( $key === $meta_key ) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		protected function process_cloned_meta( $source_blog_id, $item_id, $new_item_id, $meta_key, $unserialized_meta_value ) {
+
+			// Loop through the fields and render them
+			$field_objects = $this->get_field_objects();
+			$temp_meta     = null;
+
+			// Deal with meta boxes saved in one meta value
+			if ( 'single' === $this->meta['save_mode'] ) {
+				// Only deal with our meta
+				if( $meta_key !== $this->meta['id']) {
+					return $unserialized_meta_value;
+				}
+
+				$temp_meta = array();
+
+				// It is our meta, so loop over the field objects
+				foreach ( $field_objects as $field_object_key => $field_object ) {
+					// Check for missing meta values and add empty strings if necessary
+					$meta_value = (isset($unserialized_meta_value[$field_object_key])) ? $unserialized_meta_value[$field_object_key] : '';
+					$temp_meta[$field_object_key] = $field_object->get_cloned_value( $source_blog_id, $item_id, $new_item_id, $meta_value );
+				}
+
+				// If it is not our meta, just return the raw value
+				return $temp_meta;
+			}
+
+			// Handle individual values
+			// Check if it is our meta
+			if ( isset( $field_objects[$meta_key] ) ) {
+				$temp_meta = $field_objects[$meta_key]->get_cloned_value( $source_blog_id, $item_id, $new_item_id, $unserialized_meta_value );
+
+				return $temp_meta;
+			}
+
+			return $unserialized_meta_value;
+		}		
+
 		/**
 		 * Initialise the fields.
 		 * Loop through the definitions. Load the class if required

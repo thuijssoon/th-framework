@@ -92,5 +92,58 @@ if ( !class_exists( 'TH_Meta_Field_Postselect' ) ) {
 			return esc_html( get_the_title( $post->ID ) );
 		}
 
+		public function get_cloned_value( $source_blog_id, $item_id, $new_item_id, $meta_value ) {
+			// Get the source post
+			$current_blog_id = get_current_blog_id();
+			switch_to_blog( $source_blog_id );
+			if( 'slug' === $this->id_or_slug() ) {
+				$source_post = null;
+				$args=array(
+					'name'        => $meta_value,
+					'post_type'   => $this->properties['post_type'],
+					'post_status' => 'any',
+					'numberposts' => 1
+				);
+				$my_posts = get_posts($args);
+				if( $my_posts ) {
+					$source_post = $my_posts[0];
+				}
+			} else {
+				$source_post = get_post( $meta_value );
+			}
+			switch_to_blog( $current_blog_id );
+
+			if ( empty( $source_post ) )
+				return '';
+
+			// Let's try to find the post with the same slug
+			global $wpdb;
+			$source_post_name     = $source_post->post_name;
+			$destination_post_ids = $wpdb->get_results( "SELECT ID FROM $wpdb->posts WHERE post_name = '$source_post_name' " );
+
+			if ( empty( $destination_post_ids ) ) {
+				// There's no speaker created, let's copy it
+				$copier = Multisite_Content_Copier_Factory::get_copier( 'post', $source_blog_id, array( $source_post->ID ), array() );
+				$destination_post = $copier->copy_item( $source_post->ID );
+
+				if( 'slug' === $this->id_or_slug() ) {
+					$post = get_post($destination_post['new_post_id']);
+					$new_meta_value = $post->post_name;
+				} else {
+					$new_meta_value = $destination_post['new_post_id'];
+				}
+			}
+			else {
+				// The speaker already exists, let's assign it
+				if( 'slug' === $this->id_or_slug() ) {
+					$new_meta_value = $source_post_name;
+				} else {
+					$new_meta_value = $destination_post_ids[0];
+				}
+			}
+
+			return $new_meta_value;
+		}
+
 	}
 }

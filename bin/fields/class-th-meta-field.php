@@ -225,6 +225,10 @@ if ( !class_exists( 'TH_Meta_Field' ) ) {
 			return $value;
 		}
 
+		public function get_cloned_value( $source_blog_id, $item_id, $new_item_id, $meta_value ) {
+			return $meta_value;
+		}
+
 		protected function handle_defaults( $defaults ) {
 			if ( !isset( $this->default_properties ) ) {
 				$this->default_properties = array();

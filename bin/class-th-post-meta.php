@@ -25,9 +25,12 @@ if ( !class_exists( 'TH_Post_Meta' ) ) {
 
 		/**
 		 * The values of the saved meta.
+		 *
 		 * @var array
 		 */
 		private $values = null;
+
+		private static $suppress_mcc_hooks = false;
 
 		/**
 		 * Create a TH_Meta object.
@@ -67,7 +70,7 @@ if ( !class_exists( 'TH_Post_Meta' ) ) {
 
 				// Only allow column sorting for metaboxes where
 				// values are stored individually
-				if( 'individual' === $this->meta['save_mode'] ) {
+				if ( 'individual' === $this->meta['save_mode'] ) {
 					// Register sortable columns
 					add_filter( 'manage_edit-' . $post_type . '_sortable_columns', array( $this, 'register_sortable_columns' ) );
 
@@ -80,6 +83,7 @@ if ( !class_exists( 'TH_Post_Meta' ) ) {
 			$this->admin_pages = array( 'post.php', 'post-new.php', 'page-new.php', 'page.php' );
 
 			add_filter( 'th_post_meta_show_on', array( $this, 'add_for_post_type' ), 10, 2 );
+			add_action( 'mcc_copy_post_meta', array( $this, 'handle_mcc_copy_post_meta' ), 10, 5 );
 		}
 
 		/**
@@ -104,7 +108,7 @@ if ( !class_exists( 'TH_Post_Meta' ) ) {
 			global $post;
 
 			$errors = WPTP_Error::get_instance()
-				->get_saved_errors();
+			->get_saved_errors();
 
 			$output = "";
 
@@ -128,7 +132,7 @@ if ( !class_exists( 'TH_Post_Meta' ) ) {
 				}
 				$class   = isset( $errors[$field->get_slug()] ) ? 'class="th_error"' : '';
 				$output .= '<tr '. $class  . '>';
-				if( $this->meta['show_names'] ) {
+				if ( $this->meta['show_names'] ) {
 					$output .= '<th scope="row">';
 					$output .= $field->render_label();
 					$output .= '</th>';
@@ -146,7 +150,7 @@ if ( !class_exists( 'TH_Post_Meta' ) ) {
 
 		public function save( $post_id ) {
 			// Do nothing if hooks are suppressed by other plugin
-			if( self::$suppress_hooks ) {
+			if ( self::$suppress_hooks ) {
 				return $post_id;
 			}
 
@@ -260,7 +264,7 @@ if ( !class_exists( 'TH_Post_Meta' ) ) {
 			$fields = $this->get_field_objects();
 			$field  = $fields[$slug];
 
-			echo $field->get_column_value($this->get_value($slug));
+			echo $field->get_column_value( $this->get_value( $slug ) );
 		}
 
 
@@ -309,19 +313,61 @@ if ( !class_exists( 'TH_Post_Meta' ) ) {
 			return $visible;
 		}
 
+		public static function suppress_mcc_hooks( $suppress_hooks ) {
+			self::$suppress_mcc_hooks = $suppress_hooks;
+		}
+
+		/**
+		 * [handle_mcc_copy_post_meta description]
+		 *
+		 * @param [type]  $orig_blog_id            [description]
+		 * @param [type]  $item_id                 [description]
+		 * @param [type]  $new_item_id             [description]
+		 * @param [type]  $meta_key                [description]
+		 * @param [type]  $unserialized_meta_value [description]
+		 * @return [type]                          [description]
+		 */
+		public function handle_mcc_copy_post_meta( $source_blog_id, $item_id, $new_item_id, $meta_key, $unserialized_meta_value ) {
+
+			if( !$this->is_our_meta( $meta_key ) ) {
+				return;
+			}
+
+			$post             = get_post( $new_item_id );
+			$post_type_object = get_post_type_object( $post->post_type );
+
+			// Check precondition: post_type
+			if ( !in_array( $post->post_type, $this->meta['post_types'] ) )
+				return;
+
+			// Check precondition: capability
+			if ( !current_user_can( $post_type_object->cap->edit_posts ) )
+				return;
+
+			// This post type has meta and we have permission
+
+			// Get the new value
+			remove_action( 'mcc_copy_post_meta', array( $this, 'handle_mcc_copy_post_meta' ), 10, 5 );
+			$new_meta_value = $this->process_cloned_meta( $source_blog_id, $item_id, $new_item_id, $meta_key, $unserialized_meta_value );
+			add_action( 'mcc_copy_post_meta', array( $this, 'handle_mcc_copy_post_meta' ), 10, 5 );
+
+			// Save the meta
+			update_post_meta( $new_item_id, $meta_key, $new_meta_value );
+		}
+
 		private function get_value( $slug ) {
 			global $post;
 
 			if ( 'single' == $this->meta['save_mode'] ) {
 				$values = get_post_meta( $post->ID, $this->meta['id'], true );
-				if(isset($values[$slug])) {
+				if ( isset( $values[$slug] ) ) {
 					return $values[$slug];
 				} else {
 					return '';
 				}
 			} else {
 				return get_post_meta( $post->ID, $slug, true );
-			}		
+			}
 		}
 
 	}

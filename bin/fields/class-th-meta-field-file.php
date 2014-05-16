@@ -197,5 +197,44 @@ if ( !class_exists( 'TH_Meta_Field_File' ) ) {
 			return $id;
 		}
 
+		public function get_cloned_value( $source_blog_id, $item_id, $new_item_id, $meta_value ) {
+			// Get the source post
+			$current_blog_id = get_current_blog_id();
+			switch_to_blog( $source_blog_id );
+			$source_post = get_post( $meta_value );
+			switch_to_blog( $current_blog_id );
+
+			if ( empty( $source_post ) )
+				return '';
+
+			// Let's try to find the post with the same slug
+			global $wpdb;
+			$source_post_name     = $source_post->post_name;
+			$destination_post_ids = $wpdb->get_results( "SELECT ID FROM $wpdb->posts WHERE post_name = '$source_post_name' " );
+
+			if ( empty( $destination_post_ids ) ) {
+
+				// There's no speaker created, let's copy it
+				$copier = Multisite_Content_Copier_Factory::get_copier( 'post', $source_blog_id, array( $item_id ), array() );
+				$attachment_id = $copier->copy_single_image( $source_blog_id, $meta_value );
+
+				$my_post = array(
+					'ID'          => $attachment_id,
+					'post_parent' => $new_item_id
+				);
+
+				// Update the post into the database
+				wp_update_post( $my_post );
+
+				$new_meta_value = $attachment_id;
+			}
+			else {
+				// The speaker already exists, let's assign it
+				$new_meta_value = $destination_post_ids[0]->ID;
+			}
+
+			return $new_meta_value;
+		}
+
 	}
 }
