@@ -153,11 +153,11 @@ if ( !class_exists( 'TH_Meta_Field_Oembed' ) ) {
 				$fallback = $wp_embed->maybe_make_link( $value );
 
 				if ( !$check_embed || $check_embed == $fallback ) {
-					$errors[$this->get_slug()] = array(
-							'slug'        => $this->get_slug(),
-							'title'       => esc_html( $this->properties['label'] ),
-							'message'     => $error_messages['not_oembed']
-					);
+					// $errors[$this->get_slug()] = array(
+					// 		'slug'        => $this->get_slug(),
+					// 		'title'       => esc_html( $this->properties['label'] ),
+					// 		'message'     => $error_messages['not_oembed']
+					// );
 				}
 			}
 
