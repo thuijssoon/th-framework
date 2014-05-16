@@ -528,7 +528,7 @@ if ( !class_exists( 'WPTP_Error' ) ) {
 			global $post;
 
 			if ( !in_array( $post->post_type, array_keys( $this->post_types ) ) ) {
-				return;
+				return $post_states;
 			}
 
 			if ( isset( $_REQUEST['post_status'] ) ) {
