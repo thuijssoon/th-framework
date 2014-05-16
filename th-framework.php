@@ -1,5 +1,7 @@
 <?php
 /**
+ *
+ *
  * @package     TH Framework
  * @author      Thijs Huijssoon <thuijssoon@googlemail.com>
  * @license     GPL-2.0+
