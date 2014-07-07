@@ -133,3 +133,94 @@ tr.th-meta .th-oembed-container .embed_status { position: relative; }
 tr.th-meta .th-oembed-container .embed_status { border:1px solid #DFDFDF; background: #FAFAFA; max-width:350px; padding: 5px; -moz-border-radius: 2px; border-radius: 2px;}
 tr.th-meta .th-oembed-container .embed_status { float: left; max-width:800px;}
 
+
+/* Additional images meta box styles */
+
+/* Clearfix to ensure floats are contained */
+.esl-additional-images-container:before,
+.esl-additional-images-container:after {
+    content: "";
+    display: table;
+} 
+.esl-additional-images-container:after {
+    clear: both;
+}
+.esl-additional-images-container {
+    zoom: 1; /* For IE 6/7 (trigger hasLayout) */
+}
+
+.esl-additional-images-picker {
+    position: relative;
+    float: left;
+    margin: 0px 20px 10px 0;
+}
+.esl-image-preview {
+    position: relative;
+    display: block;
+    background-color: rgb(245, 245, 245);
+    width: 200px;
+    height: 200px;
+}
+.esl-image-preview img {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: none;
+    max-width: 200px;
+    max-height: 200px;
+}
+
+.esl-additional-images-picker.esl-no-image .esl-image-remove {
+    display: none;
+}
+.esl-additional-images-picker.esl-has-image .esl-image-add {
+    display: none;
+}
+
+.esl-image-drag-handle {
+    position: absolute;
+    right: -6px;
+    top: -6px;
+    width: 24px;
+    height: 24px;
+    cursor: move;
+    display: none;
+    line-height: 24px;
+    text-align: center;
+    font-size: 20px;
+}
+.esl-additional-images-picker:hover .esl-image-drag-handle {
+    display: block;
+}
+.esl-no-image:hover .esl-image-drag-handle {
+    display: none;
+}
+.esl-additional-images-container .sortable-placeholder {
+    display: block;
+    float: left;
+    width: 200px;
+    height: 245px;
+    margin: 0px 20px 10px 0;
+}
+.esl-additional-images-picker.ui-sortable-helper .esl-image-preview {
+    -webkit-box-shadow: 3px 3px 5px 0px rgba(50, 50, 50, 0.3);
+    -moz-box-shadow:    3px 3px 5px 0px rgba(50, 50, 50, 0.3);
+    box-shadow:         3px 3px 5px 0px rgba(50, 50, 50, 0.3);
+}
+.esl-additional-images-picker.ui-sortable-helper p {
+    display: none;
+}
+
+#side-sortables .esl-image-preview {
+    width: 254px;
+    height: 254px;
+}
+#side-sortables .esl-image-preview img {
+    max-width: 254px;
+    max-height: 254px;
+}
+#side-sortables .esl-additional-images-container .sortable-placeholder {
+    width: 252px;
+    height: 297px;
+}
+
