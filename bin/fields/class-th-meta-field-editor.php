@@ -41,9 +41,13 @@ if ( !class_exists( 'TH_Meta_Field_Editor' ) ) {
 			$output = '';
 
 			// Settings
-			$settings = array();
+			$settings = array( 'textarea_name' => $this->namespace . '-' . $this->properties['slug'] );
 			if ( isset( $this->properties['settings'] ) ) {
 				$settings = $this->properties['settings'];
+
+				if(!isset($settings['textarea_name'])) {
+					$settings['textarea_name'] = $this->namespace . '-' . $this->properties['slug'];
+				}
 			}
 
 			// Class
@@ -63,7 +67,7 @@ if ( !class_exists( 'TH_Meta_Field_Editor' ) ) {
 
 			// Catch output since wp_editor() echoes the result
 			ob_start();
-			wp_editor( $value, $this->namespace . '-' . $this->properties['slug'], $settings );
+			wp_editor( $value, $this->sanitize_id( $this->namespace . '-' . $this->properties['slug'] ), $settings );
 			$output .= ob_get_contents();
 			ob_end_clean();
 
@@ -147,6 +151,14 @@ jQuery( document ).ready( function($) {
 </script>
 <?php
 			self::$script_included = true;
+		}
+
+		private function sanitize_id( $id ) {
+			$return = str_replace( '-', '_', $id);
+			$return = str_replace( '[', '_', $return);
+			$return = str_replace( ']', '_', $return);
+			$return = strtolower($return);
+			return $return;
 		}
 
 	}
