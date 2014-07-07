@@ -491,11 +491,17 @@ if ( !class_exists( 'TH_CPT' ) ) {
 				return $this;
 			}
 
-			$this->menu_icon = $menu_icon;
-			// remove menu icon from $post_type_args if present
-			// so we can override it with css
-			$this->post_type_args['menu_icon'] = '';
-			add_action( 'admin_head', array( $this, 'acb_admin_head_menu_icon_css' ) );
+			// Are we using the new dashicons ?
+			if (0 === strpos($menu_icon, 'dashicons-')) {
+				$this->post_type_args['menu_icon'] = $menu_icon;
+			} else { // fallback for previous versions
+				$this->menu_icon = $menu_icon;
+				// remove menu icon from $post_type_args if present
+				// so we can override it with css
+				$this->post_type_args['menu_icon'] = '';
+				add_action( 'admin_head', array( $this, 'acb_admin_head_menu_icon_css' ) );
+			}
+
 			return $this;
 		}
 
