@@ -453,6 +453,9 @@ if ( !class_exists( 'TH_CPT' ) ) {
 			}
 
 			add_action( 'right_now_content_table_end', array( $this, 'acb_right_now_content_table_end_add_cpt' ) );
+
+			add_action( 'dashboard_glance_items', array( $this, 'acb_dashboard_glance_items_add_cpt' ) );
+			
 			return $this;
 		}
 
@@ -862,6 +865,26 @@ if ( !class_exists( 'TH_CPT' ) ) {
 			echo '<td class="t ' . $this->post_type . '">' . $text . '</td>';
 			echo '</tr>';
 		}
+
+		/**
+		 * Action callback to add CPT to the At a Glance table on the dashboard.
+		 *
+		 * @wp-hook  dashboard_glance_items
+		 * @return   void
+		 * @since    0.1.0
+		 * @author   Thijs Huijssoon <thuijssoon@googlemail.com>
+		 */
+		public function acb_dashboard_glance_items_add_cpt() {
+			$post_type_object = get_post_type_object( $this->post_type );
+			$num_posts = wp_count_posts( $this->post_type );
+			$num = number_format_i18n( $num_posts->publish );
+			$text = _n( $post_type_object->labels->singular_name, $post_type_object->labels->name, intval( $num_posts->publish ) );
+			if ( current_user_can( $post_type_object->cap->edit_posts ) ) {
+				$output = '<a href="edit.php?post_type=' . $post_type_object->name . '">' . $num . ' ' . $text . '</a>';
+				echo '<li class="post-count ' . $post_type_object->name . '-count">' . $output . '</li>';
+			}
+		}
+
 
 		/**
 		 * Add inline css to replace the default
