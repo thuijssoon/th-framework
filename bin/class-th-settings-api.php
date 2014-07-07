@@ -564,6 +564,7 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 					echo " <span class='description'>" . $description . "</span>";
 				break;
 			case 'postselect':
+			case 'gfselect':
 			case 'taxonomyselect':
 			case 'select':
 				$valid_options = $this->get_valid_options($field);
@@ -586,7 +587,9 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 					echo "<br /><span class='description'>" . $description . "</span>";
 				break;
 			case 'editor':
-				wp_editor( $sanitized[$field['name']], $field['field_name'] );
+				$editor_settings = array( 'textarea_name' => $field['field_name'] );
+				$editor_id = $this->sanitize_id( $field['field_name'] );
+				wp_editor( $sanitized[$field['name']], $editor_id, $editor_settings );
 				$description = $field['description'];
 				if ( !empty( $description ) )
 					echo "<br /><span class='description'>" . $description . "</span>";
@@ -963,6 +966,7 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 					break;
 				case 'radio':
 				case 'postselect':
+				case 'gfselect':
 				case 'taxonomyselect':
 				case 'select':
 					// get the list of valid options:
@@ -1085,36 +1089,7 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 
 						// a "cover-all" fall-back when the class argument is not set
 					default:
-						// accept only limited html
-						//my allowed html
-						$allowed_html = array(
-							'a'    => array( 'href' => array (), 'title' => array () ),
-							'b'    => array(),
-							'blockquote'  => array( 'cite' => array () ),
-							'br'    => array(),
-							'dd'    => array(),
-							'dl'    => array(),
-							'dt'    => array(),
-							'em'    => array (),
-							'i'    => array (),
-							'li'    => array(),
-							'ol'    => array(),
-							'p'    => array(),
-							'q'    => array( 'cite' => array () ),
-							'strong'   => array(),
-							'ul'    => array(),
-							'h1'    => array( 'align' => array (), 'class' => array (), 'id' => array (), 'style' => array () ),
-							'h2'    => array( 'align' => array (), 'class' => array (), 'id' => array (), 'style' => array () ),
-							'h3'    => array( 'align' => array (), 'class' => array (), 'id' => array (), 'style' => array () ),
-							'h4'    => array( 'align' => array (), 'class' => array (), 'id' => array (), 'style' => array () ),
-							'h5'    => array( 'align' => array (), 'class' => array (), 'id' => array (), 'style' => array () ),
-							'h6'    => array( 'align' => array (), 'class' => array (), 'id' => array (), 'style' => array () )
-						);
-
-						$value   = trim( $value ); // trim whitespace
-						$value   = force_balance_tags( $value ); // find incorrectly nested or missing closing tags and fix markup
-						$value   = wp_kses( $value, $allowed_html ); // need to add slashes still before sending to the database
-						$sanitized[$name] = addslashes( $value );
+						$sanitized[$name] = wp_kses_post( $value );
 						break;
 					}
 					break;
@@ -1175,6 +1150,21 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 						}
 					}
 					break;
+
+				case 'gfselect':
+					if ( class_exists( 'RGFormsModel' ) ) {
+						$forms = RGFormsModel::get_forms( null, 'title' );
+						foreach ( $forms as $form ) {
+							$result[$form->id] = $form->title;
+						}
+						if(!count($result)) {
+							$result[0] = 'No forms available';
+						}
+					} else {
+						$result[0] = 'Gravity Forms not installed';
+					}
+
+					break;
 				
 				default:
 					$result = $def['valid_options'];
@@ -1182,6 +1172,14 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 			}
 			return $result;
 		} // end of function get_valid_options
+
+		private function sanitize_id( $id ) {
+			$return = str_replace( '-', '_', $id);
+			$return = str_replace( '[', '_', $return);
+			$return = str_replace( ']', '_', $return);
+			$return = strtolower($return);
+			return $return;
+		}
 
 	} // end of class TH_Settings_API
 
