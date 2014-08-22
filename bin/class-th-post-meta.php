@@ -83,6 +83,7 @@ if ( !class_exists( 'TH_Post_Meta' ) ) {
 			$this->admin_pages = array( 'post.php', 'post-new.php', 'page-new.php', 'page.php' );
 
 			add_filter( 'th_post_meta_show_on', array( $this, 'add_for_post_type' ), 10, 2 );
+			add_filter( 'th_post_meta_show_on', array( $this, 'add_for_page_template' ), 11, 2 );
 			add_action( 'mcc_copy_post_meta', array( $this, 'handle_mcc_copy_post_meta' ), 10, 5 );
 		}
 
@@ -92,15 +93,18 @@ if ( !class_exists( 'TH_Post_Meta' ) ) {
 		 * @wp-hook  add_meta_boxes
 		 */
 		public function add() {
-			foreach ( $this->meta['post_types'] as $post_type ) {
-				add_meta_box(
-					$this->meta['id'],
-					$this->meta['title'],
-					array( $this, 'render' ),
-					$post_type,
-					$this->meta['context'],
-					$this->meta['priority']
-				);
+			$post_types = get_post_types();
+			foreach ( $post_types as $post_type ) {
+				if($this->is_visible()) {
+					add_meta_box(
+						$this->meta['id'],
+						$this->meta['title'],
+						array( $this, 'render' ),
+						$post_type,
+						$this->meta['context'],
+						$this->meta['priority']
+					);
+				}
 			}
 		}
 
@@ -309,7 +313,25 @@ if ( !class_exists( 'TH_Post_Meta' ) ) {
 		 */
 		public function add_for_post_type( $visible, $meta ) {
 			$post_type = get_current_screen()->post_type;
-			$visible   = $visible && in_array( $post_type, $meta['post_types'] );
+			if ( 'any' !== $meta['post_types'] ) {
+				$visible   = $visible && in_array( $post_type, $meta['post_types'] );
+			}
+			return $visible;
+		}
+
+		public function add_for_page_template( $visible, $meta ) {
+			global $post;
+			if ( isset($meta['page_template']) && count( $meta['page_template'] ) ) {
+				$slug    = get_page_template_slug( $post->ID );
+
+				if(empty($slug)) {
+					return false;
+				}
+
+				$test    = in_array($slug, $meta['page_template']);
+				$visible = $visible && $test;
+				_log($visible);
+			}
 			return $visible;
 		}
 
@@ -329,7 +351,7 @@ if ( !class_exists( 'TH_Post_Meta' ) ) {
 		 */
 		public function handle_mcc_copy_post_meta( $source_blog_id, $item_id, $new_item_id, $meta_key, $unserialized_meta_value ) {
 
-			if( !$this->is_our_meta( $meta_key ) ) {
+			if ( !$this->is_our_meta( $meta_key ) ) {
 				return;
 			}
 
