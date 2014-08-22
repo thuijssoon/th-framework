@@ -16,7 +16,7 @@
  * Plugin Name: TH Framework
  * Plugin URI:  https://github.com/thuijssoon/th-framework
  * Description: Utility plugin to enable Custom Post Type, Custom Taxonomy & Custom Meta classes.
- * Version:     0.1.2
+ * Version:     0.1.3 (22/08/2014)
  * Author:      Thijs Huijssoon <thuijssoon@googlemail.com>
  * Author URI:  https://github.com/thuijssoon/
  * Text Domain: th-framework
