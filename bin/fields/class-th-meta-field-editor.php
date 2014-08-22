@@ -110,6 +110,10 @@ if ( !class_exists( 'TH_Meta_Field_Editor' ) ) {
 
 			switch ( $this->properties['validation'] ) {
 
+			case 'no_html':
+				$value = wp_strip_all_tags( $value );
+				break;
+
 			case 'html_post':
 				$value = wp_kses_post( $value );
 				break;
