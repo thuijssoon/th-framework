@@ -8,7 +8,7 @@
  * @todo      Add custom roles & capabilities.
  * @todo      Change text domain.
  *
- * @version   0.1.0
+ * @version   0.1.1
  * @package   TH CPT
  * @author    Thijs Huijssoon <thuijssoon@googlemail.com>
  * @license   GPL 2.0+ - http://www.gnu.org/licenses/gpl.txt
@@ -151,6 +151,14 @@ if ( !class_exists( 'TH_CPT' ) ) {
 		 * @since  0.1.0
 		 */
 		private $menu_icon;
+
+		/**
+		 * Menu icon character code, used in at a glance items.
+		 *
+		 * @var    string
+		 * @since  0.1.1
+		 */
+		private $character_code;
 
 		/**
 		 * Fields that must be completed in order for
@@ -455,6 +463,7 @@ if ( !class_exists( 'TH_CPT' ) ) {
 			add_action( 'right_now_content_table_end', array( $this, 'acb_right_now_content_table_end_add_cpt' ) );
 
 			add_action( 'dashboard_glance_items', array( $this, 'acb_dashboard_glance_items_add_cpt' ) );
+			add_action( 'admin_head', array( $this, 'acb_admin_head_at_a_glance_icons' ) );
 			
 			return $this;
 		}
@@ -488,7 +497,7 @@ if ( !class_exists( 'TH_CPT' ) ) {
 		 * @since   0.1.0
 		 * @author  Thijs Huijssoon <thuijssoon@googlemail.com>
 		 */
-		public function set_menu_icon( $menu_icon ) {
+		public function set_menu_icon( $menu_icon, $character_code = false ) {
 			// Admin only functionality
 			if ( !is_admin() ) {
 				return $this;
@@ -497,6 +506,7 @@ if ( !class_exists( 'TH_CPT' ) ) {
 			// Are we using the new dashicons ?
 			if (0 === strpos($menu_icon, 'dashicons-')) {
 				$this->post_type_args['menu_icon'] = $menu_icon;
+				$this->character_code = $character_code;
 			} else { // fallback for previous versions
 				$this->menu_icon = $menu_icon;
 				// remove menu icon from $post_type_args if present
@@ -871,7 +881,7 @@ if ( !class_exists( 'TH_CPT' ) ) {
 		 *
 		 * @wp-hook  dashboard_glance_items
 		 * @return   void
-		 * @since    0.1.0
+		 * @since    0.1.1
 		 * @author   Thijs Huijssoon <thuijssoon@googlemail.com>
 		 */
 		public function acb_dashboard_glance_items_add_cpt() {
@@ -885,6 +895,19 @@ if ( !class_exists( 'TH_CPT' ) ) {
 			}
 		}
 
+		/**
+		 * Action callback to add CPT icons to the At a Glance table on the dashboard.
+		 *
+		 * @wp-hook  admin_head
+		 * @return   void
+		 * @since    0.1.1
+		 * @author   Thijs Huijssoon <thuijssoon@googlemail.com>
+		 */
+		public function acb_admin_head_at_a_glance_icons() {
+			if ( $this->character_code ) {
+				echo '<style type="text/css">.' . $this->post_type . '-count a:before {content: "' . $this->character_code . '"!important;}</style>';
+			}
+		}
 
 		/**
 		 * Add inline css to replace the default
