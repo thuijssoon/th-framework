@@ -91,5 +91,21 @@ function th_framework_load() {
 		add_action( 'admin_notices', 'th_framework_requirements_not_met' );
 	}
 }
+
+if ( !function_exists( '_log' ) ) {
+	function _log( $var, $message = '' ) {
+		if ( WP_DEBUG === true ) {
+			if ( ! empty( $message ) ) {
+				error_log( $message );
+			}
+			if ( is_array( $var ) || is_object( $var ) ) {
+				error_log( print_r( $var, true ) );
+			} else {
+				error_log( $var );
+			}
+		}
+	}
+}
+
 // Need to load late to enable other plugins to load first and attach hooks
 add_action( 'plugins_loaded', 'th_framework_load', 1000 );
