@@ -144,6 +144,7 @@ if ( !class_exists( 'TH_Meta_Field_Text' ) ) {
 					'not_number'       => sprintf( __( '%s is not a number', 'text_domain' ), esc_html( $value ) ),
 					'number_too_big'   => sprintf( __( '%s exceeds the maximum value of %s', 'text_domain' ), esc_html( $value ), esc_html( $this->properties['max'] ) ),
 					'number_too_small' => sprintf( __( '%s is less than the minimum value of %s', 'text_domain' ), esc_html( $value ), esc_html( $this->properties['min'] ) ),
+					'not_twitter_id'   => sprintf( __( '%s is not a well formed Twitter username. Twitter usernames must have between 1 and 15 characters and may only contain the following characters: A to Z, a to z, 0 to 9 and _', 'text_domain' ), esc_html( $value ) ),
 				),
 				$this->properties
 			);
@@ -190,6 +191,33 @@ if ( !class_exists( 'TH_Meta_Field_Text' ) ) {
 					);
 					// Strip out everything that not: 0-9, +, (), # or a single space
 					$value =  preg_replace( "/[^0-9\(\)\+\#\s]/", '', $value );
+				}
+				break;
+
+			case 'twitter':
+				// Remove the @ sign from the start if present
+				$value = ltrim($value, '@');
+				$len   = strlen( $value );
+
+				// Check the length
+				if( $len < 1 || $len > 15 ) {
+					// Truncate string
+					$value = substr($value, 0, 15);
+					$errors[$this->get_slug()] = array(
+							'slug'        => $this->get_slug(),
+							'title'       => esc_html( $this->properties['label'] ),
+							'message'     => $error_messages['not_twitter_id']
+					);
+				}
+
+				// Check allowed characters
+				if( !preg_match('/^[A-Za-z0-9_]{1,15}$/', $value) ) {
+					$value = preg_replace("/[^A-Za-z0-9_]/", "", $value);
+					$errors[$this->get_slug()] = array(
+							'slug'        => $this->get_slug(),
+							'title'       => esc_html( $this->properties['label'] ),
+							'message'     => $error_messages['not_twitter_id']
+					);
 				}
 				break;
 
