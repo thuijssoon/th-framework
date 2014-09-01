@@ -19,7 +19,8 @@ if ( !class_exists( 'TH_Meta_Field_Editor' ) ) {
 
 			$this->default_properties = array_merge(
 				array(
-					'validation' => 'html_post'
+					'validation' => 'html_post',
+					'max-length' => '',
 				),
 				$this->default_properties
 			);
@@ -65,11 +66,18 @@ if ( !class_exists( 'TH_Meta_Field_Editor' ) ) {
 				$value = $this->properties['default'];
 			}
 
+			// Max length
+			if(!empty($this->properties['max-length'])) {
+				add_filter( 'the_editor', array($this, 'add_props_to_textarea') );
+			}
+
 			// Catch output since wp_editor() echoes the result
 			ob_start();
 			wp_editor( $value, $this->sanitize_id( $this->namespace . '-' . $this->properties['slug'] ), $settings );
 			$output .= ob_get_contents();
 			ob_end_clean();
+
+			remove_filter( 'the_editor', array($this, 'add_props_to_textarea') );
 
 			// Error
 			// TODO: Is there a better way to go except by using wp_kses_post?
@@ -84,6 +92,12 @@ if ( !class_exists( 'TH_Meta_Field_Editor' ) ) {
 			}
 
 			return apply_filters( 'th_field_' . $this->type . '_field', $output, $value, $error, $this->properties );
+		}
+
+		public function add_props_to_textarea($html) {
+			$pieces = explode('name=', $html);
+			$insert = 'th-max-length="' . intval($this->properties['max-length']) . '" name=';
+			return $pieces[0] . $insert . $pieces[1];
 		}
 
 		public function validate( &$errors ) {
@@ -133,6 +147,86 @@ if ( !class_exists( 'TH_Meta_Field_Editor' ) ) {
 			if(self::$script_included) {
 				return;
 			}
+
+?>
+<script type="text/javascript">
+/**
+* `String.trim()` polyfill for non-supporting browsers. This is the
+* recommended polyfill on MDN.
+*
+* @see     <http://goo.gl/uYveB>
+* @see     <http://goo.gl/xjIxJ>
+*
+* @return  {String}  The original string with leading and trailing whitespace
+*                    removed.
+*/
+
+if (!String.prototype.trim) {
+	String.prototype.trim = function () {
+		return this.replace(/^\s+|\s+$/g, '')
+	}
+}
+
+function update_message(ed) {
+	var $this = jQuery(ed.getElement()),
+		max   = typeof undefined === typeof $this.attr('th-max-length') ? -1 : parseInt($this.attr('th-max-length')),
+		type  = typeof undefined === typeof $this.attr('th-count') ? 'words' : $this.attr('th-count');
+
+	if(0 < max) {
+		$parent_td = $this.parents(".th_editor_cell");
+		$error_msg = $parent_td.find('.errormessage:first');
+		$descr_msg = $parent_td.find('.word-count:first');
+		original   = ed.getContent().replace(/<\/?[a-z][^>]*>/gi, '');
+		trimmed    = original.trim();
+		wordcount  = trimmed ? (trimmed.replace(/['";:,.?¿\-!¡]+/g, '').match(/\S+/g) || []).length : 0
+
+    	// wordcount = (editor_content.split(' ').length);
+
+		if(wordcount > max) {
+			$error_msg.text('You have exceeded ' + max + ' words.');
+			$descr_msg.hide();
+			$error_msg.show();
+		} else {
+			$error_msg.hide();					
+			$descr_msg.text('You have ' + parseInt(max - wordcount) + ' words left.');
+			$descr_msg.show();
+		}
+	}	
+}
+
+window.onload = function () {
+	for (i=0; i < tinymce.editors.length; i++){
+		$editor_el = jQuery(tinymce.editors[i].getElement());
+		$parent_td = $editor_el.parents(".th_editor_cell");
+		$error_msg = $parent_td.find('.errormessage:first');
+		$descr_msg = jQuery('<p class="description word-count"></p>');
+		$iframe    = $parent_td.find('iframe').get(0);
+
+		$parent_td.append($descr_msg);
+		$descr_msg.hide();
+
+
+		if(!$error_msg.length) {
+			$error_msg = jQuery('<p class="errormessage"></p>');
+			$parent_td.append($error_msg);
+			$error_msg.hide();
+		}
+		
+		update_message(tinymce.editors[i]);
+
+		tinymce.editors[i].on('keyup', function(e) {
+			update_message(this);
+        });
+
+		// tinymce.editors[i].onKeyUp.add( function(ed, e) {
+		// 	update_message(ed);
+		// });	
+
+	}
+}
+</script>
+<?php
+
 			// Only continue if adding new tag
 			if('edit-tags' !== get_current_screen()->base || isset($_GET['tag_ID'])) {
 				return;
@@ -152,6 +246,7 @@ jQuery( document ).ready( function($) {
 		}
 	});
 } );
+
 </script>
 <?php
 			self::$script_included = true;
