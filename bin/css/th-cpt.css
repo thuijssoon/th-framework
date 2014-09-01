@@ -69,6 +69,29 @@ table.th-meta .th-map-camvas-container { border:1px solid #DFDFDF; background: #
 table.th-meta .th-map-camvas-container { width: 388px; }
 table.th-meta .th-map-camvas-container .th-map-camvas { position: relative; width:388px; height:260px; }
 
+/* Telephone number */
+table.th-meta .th-tel {
+    display: table;
+}
+table.th-meta .th-tel > div {
+    display: table-row;
+}
+table.th-meta .th-tel > div > div {
+    display: table-cell;
+}
+input.country-code {
+    width: 3em;
+}
+input.area-code {
+    width: 9em;
+}
+input.subscriber-number {
+    width: 9em;
+}
+input.extension {
+    width: 4em;
+}
+
 /* ERROR */
 table.th-meta p.errormessage, #postimagediv p.errormessage {
 	margin: 0.5em 0;
