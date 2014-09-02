@@ -142,12 +142,7 @@ if ( !class_exists( 'TH_Meta_Field_Editor' ) ) {
 			return $value;
 		}
 
-		public function print_trigger_save_script() {
-			// Only include script once:
-			if(self::$script_included) {
-				return;
-			}
-
+		public static function enqueue_js() {
 ?>
 <script type="text/javascript">
 /**
@@ -226,6 +221,13 @@ window.onload = function () {
 }
 </script>
 <?php
+		}
+
+		public function print_trigger_save_script() {
+			// Only include script once:
+			if(self::$script_included) {
+				return;
+			}
 
 			// Only continue if adding new tag
 			if('edit-tags' !== get_current_screen()->base || isset($_GET['tag_ID'])) {
