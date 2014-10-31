@@ -88,8 +88,11 @@ if ( !class_exists( 'TH_Meta_Field_Postselect' ) ) {
 			if( empty( $value ) ) {
 				return '—';
 			}
-			$post = get_page_by_path( $value, OBJECT, $this->properties['post_type'] );
-			return esc_html( get_the_title( $post->ID ) );
+			if ( 'slug' == $this->properties['id_or_slug'] ) {
+				$post = get_page_by_path( $value, OBJECT, $this->properties['post_type'] );
+				return esc_html( get_the_title( $post->ID ) );
+			}
+			return esc_html( get_the_title( $value ) );
 		}
 
 		public function get_cloned_value( $source_blog_id, $item_id, $new_item_id, $meta_value ) {
