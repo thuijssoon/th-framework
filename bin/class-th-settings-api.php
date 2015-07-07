@@ -356,7 +356,7 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 		 * @since 0.1
 		 */
 		public function add_scripts() {
-			wp_enqueue_script( 'th-settings-api', plugins_url( 'bin/js/th-settings-api.js' , dirname(__FILE__) ), array( 'jquery' ), '1', true );
+			wp_enqueue_script( 'th-settings-api', plugins_url( 'bin/js/th-settings-api.js' , dirname(__FILE__) ), array( 'jquery', 'wp-color-picker' ), '1', true );
 			wp_localize_script( 'th-settings-api', 'th_settings', array(
 					'option_key' => $this->option_key
 				) );
@@ -371,6 +371,7 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 		 * @since 0.1
 		 */
 		public function add_styles() {
+			wp_enqueue_style( 'wp-color-picker' );
 			wp_enqueue_style( 'th-settings-api', plugins_url( 'bin/css/th-settings-api.css' , dirname(__FILE__) ) );
 		} // end of function add_styles
 
@@ -449,22 +450,30 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 						}
 						// set the class:
 						if ( !isset( $setting_def['class'] ) ) {
-							if ( isset( $setting_def['sanitize'] ) && 'numeric' == $setting_def['sanitize'] )
-								$setting_def['class'] = 'small-text';
-							elseif ( 'text' == $setting_def['type'] || 'password' == $setting_def['type'] )
-								$setting_def['class'] = 'regular-text';
-							elseif ( 'textarea' == $setting_def['type'] )
-								$setting_def['class'] = 'large-text';
-							elseif ( 'color' == $setting_def['type'] )
-								$setting_def['class'] = 'code color';
-							elseif ( 'upload' == $setting_def['type'] )
-								$setting_def['class'] = 'regular-text code upload';
-							else
-								$setting_def['class'] = '';
+							if ( isset( $setting_def['sanitize'] ) && 'numeric' == $setting_def['sanitize'] ) {
+								$setting_def['class_name'] = 'small-text';
+							}
+							elseif ( 'text' == $setting_def['type'] || 'password' == $setting_def['type'] ) {
+								$setting_def['class_name'] = 'regular-text';
+							}
+							elseif ( 'textarea' == $setting_def['type'] ) {
+								$setting_def['class_name'] = 'large-text';
+							}
+							elseif ( 'upload' == $setting_def['type'] ) {
+								$setting_def['class_name'] = 'regular-text code upload';
+							}
+							else {
+								$setting_def['class_name'] = '';
+							}
 
 							if ( ( 'text' == $setting_def['type'] || 'textarea' == $setting_def['type'] )
-								&& isset( $setting_def['sanitize'] ) && 'html' == $setting_def['sanitize'] )
-								$setting_def['class'] .= ' code';
+								&& isset( $setting_def['sanitize'] ) && 'html' == $setting_def['sanitize'] ) {
+								$setting_def['class_name'] .= ' code';
+							}
+
+							if ('text' == $setting_def['type'] && isset( $setting_def['sanitize'] ) && 'color' == $setting_def['sanitize']) {
+								$setting_def['class_name'] .= ' code color';
+							}
 
 						}
 
@@ -524,7 +533,7 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 		 */
 		public function display_settings_field( $field ) {
 			$sanitized = $this->get_sanitized_settings();
-			$class_name = empty( $field['class'] ) ? '' : "class='" . esc_attr( $field['class'] ) . "' ";
+			$class_name = empty( $field['class_name'] ) ? '' : "class='" . esc_attr( $field['class_name'] ) . "' ";
 
 			switch ( $field['type'] ) {
 			case 'checkbox':
@@ -1057,6 +1066,14 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 
 					//switch validation based on the class!
 					switch ( $def['sanitize'] ) {
+					case 'color':
+						_arche_log($value);
+						if ($this->check_color($value)) {
+							$sanitized[$name] = $value;
+						} else {
+							$sanitized[$name] = '';							
+						}
+						break;
 						//for only inline html
 					case 'inlinehtml':
 						// accept only a few inline html elements
@@ -1180,6 +1197,18 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 			$return = strtolower($return);
 			return $return;
 		}
+
+		/**
+		 * Function that will check if value is a valid HEX color.
+		 */
+		private function check_color( $value ) { 
+		     
+		    if ( preg_match( '/^#[a-f0-9]{6}$/i', $value ) ) { // if user insert a HEX color with #     
+		        return true;
+		    }
+		     
+		    return false;
+		}		
 
 	} // end of class TH_Settings_API
 

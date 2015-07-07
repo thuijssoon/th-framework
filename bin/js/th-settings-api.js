@@ -14,7 +14,7 @@ jQuery(function(){
 		});
 	}
 	
-	 function urlParam(name, url){
+	function urlParam(name, url){
 	    var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(url);
 	    if (!results) { 
 	        return 0; 
@@ -40,4 +40,8 @@ jQuery(function(){
     //        this.blur();
     //        return false;
     //    });
+});
+
+jQuery(document).ready(function($){
+    $('.color').wpColorPicker();
 });
