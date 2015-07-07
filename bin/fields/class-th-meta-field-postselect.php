@@ -66,7 +66,7 @@ if ( !class_exists( 'TH_Meta_Field_Postselect' ) ) {
 			$result = array();
 
 			foreach ( $posts as $post ) {
-				if ( 'slug' == $this->properties['id_or_slug'] ) {
+				if ( 'slug' === $this->properties['id_or_slug'] ) {
 					$result[$post->post_name] = $post->post_title;
 				} else {
 					$result[$post->ID] = $post->post_title;
