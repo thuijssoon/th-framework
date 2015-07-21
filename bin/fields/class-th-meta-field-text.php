@@ -83,7 +83,7 @@ if ( !class_exists( 'TH_Meta_Field_Text' ) ) {
 
 			// Class
 			if ( !empty( $this->properties['class'] ) ) {
-				$attributes[] = 'class="text regular-text ' . sanitize_html_class( $this->properties['class'] ) . '"';
+				$attributes[] = 'class="text ' . sanitize_html_class( $this->properties['class'] ) . '"';
 			}
 			else {
 				$attributes[] = 'class="text regular-text"';
