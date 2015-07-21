@@ -57,7 +57,7 @@ if ( !class_exists( 'TH_Meta_Field_File' ) ) {
 			$hidden_attributes[] = 'id="' . esc_attr( $this->namespace . '-' . $this->properties['slug'] ) . '-id"';
 
 			// Value
-			if ( !empty( $value ) ) {
+			if ( !empty( $value ) && is_string( get_post_status( $value ) ) ) { // is_string( get_post_status( $value ) ) checks if a post exists
 				$attachment = get_post( $value );
 				$link       = wp_get_attachment_url( $value );
 				$is_image   = wp_attachment_is_image( $value );
