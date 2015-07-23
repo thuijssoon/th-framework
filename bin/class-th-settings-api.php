@@ -997,6 +997,13 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 
 					//switch validation based on the class!
 					switch ( $def['sanitize'] ) {
+					case 'color':
+						if ($this->check_color($value)) {
+							$sanitized[$name] = $value;
+						} else {
+							$sanitized[$name] = '';							
+						}
+						break;
 					case 'numeric':
 						//accept the input only when numeric!
 						$value   = trim( $value ); // trim whitespace
@@ -1036,7 +1043,7 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 					case 'nohtml':
 						//accept the input only after stripping out all html, extra white space etc!
 						$value   = sanitize_text_field( $value ); // need to add slashes still before sending to the database
-						$sanitized[$name] = addslashes( $value );
+						$sanitized[$name] = $value;
 						break;
 						//for only inline html
 					case 'inlinehtml':
@@ -1053,7 +1060,7 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 						$value   = trim( $value ); // trim whitespace
 						$value   = force_balance_tags( $value ); // find incorrectly nested or missing closing tags and fix markup
 						$value   = wp_kses( $value, $allowed_html ); // need to add slashes still before sending to the database
-						$sanitized[$name] = addslashes( $value );
+						$sanitized[$name] = $value;
 						break;
 					}
 					break;
@@ -1066,14 +1073,6 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 
 					//switch validation based on the class!
 					switch ( $def['sanitize'] ) {
-					case 'color':
-						_arche_log($value);
-						if ($this->check_color($value)) {
-							$sanitized[$name] = $value;
-						} else {
-							$sanitized[$name] = '';							
-						}
-						break;
 						//for only inline html
 					case 'inlinehtml':
 						// accept only a few inline html elements
@@ -1088,20 +1087,20 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 						$value   = trim( $value ); // trim whitespace
 						$value   = force_balance_tags( $value ); // find incorrectly nested or missing closing tags and fix markup
 						$value   = wp_kses( $value, $allowed_html ); // need to add slashes still before sending to the database
-						$sanitized[$name] = addslashes( $value );
+						$sanitized[$name] = $value;
 						break;
 						//for no html
 					case 'nohtml':
 						//accept the input only after stripping out all html, extra white space etc!
 						$value   = sanitize_text_field( $value ); // need to add slashes still before sending to the database
-						$sanitized[$name] = addslashes( $value );
+						$sanitized[$name] = $value;
 						break;
 
 						//for allowlinebreaks
 					case 'allowlinebreaks':
 						//accept the input only after stripping out all html, extra white space etc!
 						$value   = wp_strip_all_tags( $input[$option['id']] ); // need to add slashes still before sending to the database
-						$sanitized[$name] = addslashes( $value );
+						$sanitized[$name] = $value;
 						break;
 
 						// a "cover-all" fall-back when the class argument is not set
