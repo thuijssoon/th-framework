@@ -920,9 +920,9 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 				}
 				$this->sanitized_settings['th_version'] = $meta['version'];
 				add_option( $this->option_key, $this->sanitized_settings );
-			} else if ( $meta['version'] > $this->sanitized_settings['th_version'] ) {
+			} else if ( version_compare( $meta['version'], $this->sanitized_settings['th_version'], '>' ) ) {
 					foreach ( $default_options as $name => $default_option ) {
-						if ( $default_option['since'] > $this->sanitized_settings['th_version'] ) {
+						if ( version_compare( $default_option['since'], $this->sanitized_settings['th_version'], '>' ) ) {
 							$optionname = $name;
 							$optiondefault = isset( $default_option['default'] ) ? $default_option['default'] : '';
 							$this->sanitized_settings[$optionname] = $optiondefault;
@@ -1111,15 +1111,15 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 					break;
 				}
 
-				/*if ( $sanitized[$name] != $raw_input[$name] ) {
+				if ( $sanitized[$name] != $raw_input[$name] ) {
 					$message = __( 'Setting: "' . $def['title'] . '" was sanitized as disallowed content was entered.', 'th' );
 					add_settings_error( $name, 'settings_error_' . $name, $message, 'error' );
-				}*/
+				}
 			}
-			if ( !count( get_settings_errors() ) ) {
-				$message = __( 'Settings have been saved.', 'th' );
-				add_settings_error( 'general', 'settings_updated', $message, 'updated' );
-			}
+			// if ( !count( get_settings_errors() ) ) {
+			// 	$message = __( 'Settings have been saved.', 'th' );
+			// 	add_settings_error( 'general', 'settings_updated', $message, 'updated' );
+			// }
 			return $sanitized;
 		} // end of function sanitize_input_against_definitions
 
