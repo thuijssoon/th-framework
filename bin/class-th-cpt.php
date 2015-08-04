@@ -1136,7 +1136,7 @@ if ( !class_exists( 'TH_CPT' ) ) {
 		 */
 		public function fcb_media_view_strings_featured_image_link( $strings,  $post ) {
 			$screen = get_current_screen();
-			if ( $this->post_type == $screen->post_type ) {
+			if ( isset( $screen ) && isset( $screen->post_type ) && $this->post_type == $screen->post_type ) {
 				$custom_messages                          = array();
 				$custom_messages['setFeaturedImageTitle'] = __( 'Set Featured Image' );
 				$custom_messages['setFeaturedImage']      = __( 'Set featured image' );
