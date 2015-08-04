@@ -29,7 +29,7 @@ if ( !class_exists( 'WPTP_Error' ) ) {
 
 				add_action( 'edit_form_after_title', array( $this, 'acb_edit_form_after_title_show_error' ) );
 				add_action( 'edit_form_after_editor', array( $this, 'acb_edit_form_after_editor_show_error' ) );
-				add_action( 'add_meta_boxes', array( $this, 'acb_add_meta_boxes_handle_excerpt' ) );
+				// add_action( 'add_meta_boxes', array( $this, 'acb_add_meta_boxes_handle_excerpt' ) );
 				add_filter( 'admin_post_thumbnail_html', array( $this, 'fcb_admin_post_thumbnail_html_show_errors' ) );
 
 				add_action( 'admin_head-edit.php', array( $this, 'acb_admin_head_add_css' ) );
