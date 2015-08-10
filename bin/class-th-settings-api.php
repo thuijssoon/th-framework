@@ -541,6 +541,8 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 				echo "<label for='" . esc_attr( $field['id'] ) . "'><input type='checkbox' name='" . esc_attr( $field['field_name'] ) . "' id='" . esc_attr( $field['id'] ) . "' " . $class_name . " " . checked( $sanitized[$field['name']], true, false ) . " /> " . $field['description'] . "</label>";
 				echo "</fieldset>";
 				break;
+			case 'taxonomymulticheck':
+			case 'postmulticheck':
 			case 'multicheck':
 				$valid_options = $this->get_valid_options($field);
 				echo "<fieldset><legend class='screen-reader-text'><span>" . esc_html( $field['title'] ) . "</span></legend>";
@@ -548,7 +550,7 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 				foreach ( $valid_options as $name => $value ) {
 					if ( $count > 0 )
 						echo "<br />";
-					echo "<label for='" . esc_attr( $field['id'] ) . "-$count'><input type='checkbox' name='" . esc_attr( $field['field_name'] ) . "[]' id='" . esc_attr( $field['id'] ) . "-$count' " . $class_name . " " . checked( $sanitized[$field['name']][$name], true, false ) . " value='" . esc_attr( $name ) ."' /> " . esc_html( $value ) . "</label>";
+					echo "<label for='" . esc_attr( $field['id'] ) . "-$count'><input type='checkbox' name='" . esc_attr( $field['field_name'] ) . "[]' id='" . esc_attr( $field['id'] ) . "-$count' " . $class_name . " " . checked( in_array($name, $sanitized[$field['name']] ), true, false ) . " value='" . esc_attr( $name ) ."' /> " . esc_html( $value ) . "</label>";
 					$count += 1;
 				}
 				echo "</fieldset>";
@@ -957,18 +959,17 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 					// if input value is set and is true, return true; otherwise return false:
 					$sanitized[$name] = ( ( isset( $raw_input[$name] ) && true == $raw_input[$name] ) ? true : false );
 					break;
+				case 'taxonomymulticheck':
+				case 'postmulticheck':
 				case 'multicheck':
+					$sanitized[$name] = array();
 					// get the list of valid options:
 					$valid_options = $this->get_valid_options($def);
-					// set all valid options to false:
-					foreach ( $valid_options as $key => $value ) {
-						$sanitized[$name][$key] = false;
-					}
 					// set the options to true if the value is present in the request and is a valid option:
 					if ( !empty( $raw_input[$name] ) ) {
 						foreach ( $raw_input[$name] as $value ) {
 							if ( array_key_exists( $value, $valid_options ) ) {
-								$sanitized[$name][$value] = true;
+								array_push($sanitized[$name], $value);
 							}
 						}
 					}
@@ -1111,10 +1112,10 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 					break;
 				}
 
-				if ( $sanitized[$name] != $raw_input[$name] ) {
-					$message = __( 'Setting: "' . $def['title'] . '" was sanitized as disallowed content was entered.', 'th' );
-					add_settings_error( $name, 'settings_error_' . $name, $message, 'error' );
-				}
+				// if ( $sanitized[$name] != $raw_input[$name] ) {
+				// 	$message = __( 'Setting: "' . $def['title'] . '" was sanitized as disallowed content was entered.', 'th' );
+				// 	add_settings_error( $name, 'settings_error_' . $name, $message, 'error' );
+				// }
 			}
 			// if ( !count( get_settings_errors() ) ) {
 			// 	$message = __( 'Settings have been saved.', 'th' );
@@ -1126,6 +1127,7 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 		private function get_valid_options( $def ) {
 			$result = array();
 			switch ( $def['type'] ) {
+				case 'taxonomymulticheck':
 				case 'taxonomyselect':
 					$taxonomy = !empty( $def['taxonomy'] ) ? $def['taxonomy'] : 'category';
 					$id_or_slug = !empty( $def['id_or_slug'] ) ? $def['id_or_slug'] : 'slug';
@@ -1141,6 +1143,7 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 					}
 					break;
 
+				case 'postmulticheck':
 				case 'postselect':
 					$post_type = !empty( $def['post_type'] ) ? $def['post_type'] : 'post';
 					$meta_key = !empty( $def['meta_key'] ) ? $def['meta_key'] : '';
