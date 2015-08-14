@@ -134,14 +134,13 @@ if ( !class_exists( 'TH_Meta_Field_Oembed' ) ) {
 				return '';
 			}
 
-			$clean_url = esc_url( $value );
-			if ( $clean_url !== $value ) {
+			if ( !filter_var( $value, FILTER_VALIDATE_URL ) ) {
 				$errors[$this->get_slug()] = array(
 						'slug'        => $this->get_slug(),
 						'title'       => esc_html( $this->properties['label'] ),
 						'message'     => $error_messages['not_url']
 				);
-				$value =  $clean_url;
+				$value = filter_var( $value, FILTER_SANITIZE_URL );
 			} elseif (!empty($value)) { // only perform if value is passed
 				global $wp_embed;
 				if(isset($GLOBALS['post'])) { // On post screen
