@@ -158,107 +158,111 @@ if ( !class_exists( 'TH_Meta_Field_Text' ) ) {
 				return '';
 			}
 
-			switch ( $this->properties['validation'] ) {
-			case 'url':
-				if ( !filter_var( $value, FILTER_VALIDATE_URL ) ) {
-					$errors[$this->get_slug()] = array(
-							'slug'        => $this->get_slug(),
-							'title'       => esc_html( $this->properties['label'] ),
-							'message'     => $error_messages['not_url']
-					);
-					$value = filter_var( $value, FILTER_SANITIZE_URL );
+			if ( !empty( $value ) ) {
+
+				switch ( $this->properties['validation'] ) {
+				case 'url':
+					if ( !filter_var( $value, FILTER_VALIDATE_URL ) ) {
+						$errors[$this->get_slug()] = array(
+								'slug'        => $this->get_slug(),
+								'title'       => esc_html( $this->properties['label'] ),
+								'message'     => $error_messages['not_url']
+						);
+						$value = filter_var( $value, FILTER_SANITIZE_URL );
+					}
+					break;
+
+				case 'email':
+					if ( !is_email( $value ) ) {
+						$errors[$this->get_slug()] = array(
+								'slug'        => $this->get_slug(),
+								'title'       => esc_html( $this->properties['label'] ),
+								'message'     => $error_messages['not_email']
+						);
+						$value =  sanitize_email( $value );
+					}
+					break;
+
+				case 'tel':
+					if ( !preg_match( $this->properties['pattern'], $value ) ) {
+						$errors[$this->get_slug()] = array(
+								'slug'        => $this->get_slug(),
+								'title'       => esc_html( $this->properties['label'] ),
+								'message'     => $error_messages['not_tel']
+						);
+						// Strip out everything that not: 0-9, +, (), # or a single space
+						$value =  preg_replace( "/[^0-9\(\)\+\#\s]/", '', $value );
+					}
+					break;
+
+				case 'twitter':
+					// Remove the @ sign from the start if present
+					$value = ltrim($value, '@');
+					$len   = strlen( $value );
+
+					// Check the length
+					if( $len < 1 || $len > 15 ) {
+						// Truncate string
+						$value = substr($value, 0, 15);
+						$errors[$this->get_slug()] = array(
+								'slug'        => $this->get_slug(),
+								'title'       => esc_html( $this->properties['label'] ),
+								'message'     => $error_messages['not_twitter_id']
+						);
+					}
+
+					// Check allowed characters
+					if( !preg_match('/^[A-Za-z0-9_]{1,15}$/', $value) ) {
+						$value = preg_replace("/[^A-Za-z0-9_]/", "", $value);
+						$errors[$this->get_slug()] = array(
+								'slug'        => $this->get_slug(),
+								'title'       => esc_html( $this->properties['label'] ),
+								'message'     => $error_messages['not_twitter_id']
+						);
+					}
+					break;
+
+				case 'number':
+					if ( !is_numeric( $value ) ) {
+						$errors[$this->get_slug()] = array(
+								'slug'        => $this->get_slug(),
+								'title'       => esc_html( $this->properties['label'] ),
+								'message'     => $error_messages['not_number']
+						);
+						$value = '';
+					} elseif ( isset( $this->properties['min'] ) && $value < $this->properties['min'] ) {
+						$errors[$this->get_slug()] = array(
+								'slug'        => $this->get_slug(),
+								'title'       => esc_html( $this->properties['label'] ),
+								'message'     => $error_messages['number_too_small']
+						);
+						$value = $this->properties['min'];
+					} elseif ( isset( $this->properties['max'] ) && $value > $this->properties['max'] ) {
+						$errors[$this->get_slug()] = array(
+								'slug'        => $this->get_slug(),
+								'title'       => esc_html( $this->properties['label'] ),
+								'message'     => $error_messages['number_too_large']
+						);
+						$value = $this->properties['max'];
+					}
+					break;
+
+				case 'html_post':
+					$value = wp_kses_post( $value );
+					break;
+
+				case 'html_data':
+					$value = wp_kses_data( $value );
+					break;
+
+				case 'no_html':
+				default:
+					$value = sanitize_text_field( $value );
+					break;
 				}
-				break;
 
-			case 'email':
-				if ( !is_email( $value ) ) {
-					$errors[$this->get_slug()] = array(
-							'slug'        => $this->get_slug(),
-							'title'       => esc_html( $this->properties['label'] ),
-							'message'     => $error_messages['not_email']
-					);
-					$value =  sanitize_email( $value );
-				}
-				break;
-
-			case 'tel':
-				if ( !preg_match( $this->properties['pattern'], $value ) ) {
-					$errors[$this->get_slug()] = array(
-							'slug'        => $this->get_slug(),
-							'title'       => esc_html( $this->properties['label'] ),
-							'message'     => $error_messages['not_tel']
-					);
-					// Strip out everything that not: 0-9, +, (), # or a single space
-					$value =  preg_replace( "/[^0-9\(\)\+\#\s]/", '', $value );
-				}
-				break;
-
-			case 'twitter':
-				// Remove the @ sign from the start if present
-				$value = ltrim($value, '@');
-				$len   = strlen( $value );
-
-				// Check the length
-				if( $len < 1 || $len > 15 ) {
-					// Truncate string
-					$value = substr($value, 0, 15);
-					$errors[$this->get_slug()] = array(
-							'slug'        => $this->get_slug(),
-							'title'       => esc_html( $this->properties['label'] ),
-							'message'     => $error_messages['not_twitter_id']
-					);
-				}
-
-				// Check allowed characters
-				if( !preg_match('/^[A-Za-z0-9_]{1,15}$/', $value) ) {
-					$value = preg_replace("/[^A-Za-z0-9_]/", "", $value);
-					$errors[$this->get_slug()] = array(
-							'slug'        => $this->get_slug(),
-							'title'       => esc_html( $this->properties['label'] ),
-							'message'     => $error_messages['not_twitter_id']
-					);
-				}
-				break;
-
-			case 'number':
-				if ( !is_numeric( $value ) ) {
-					$errors[$this->get_slug()] = array(
-							'slug'        => $this->get_slug(),
-							'title'       => esc_html( $this->properties['label'] ),
-							'message'     => $error_messages['not_number']
-					);
-					$value = '';
-				} elseif ( isset( $this->properties['min'] ) && $value < $this->properties['min'] ) {
-					$errors[$this->get_slug()] = array(
-							'slug'        => $this->get_slug(),
-							'title'       => esc_html( $this->properties['label'] ),
-							'message'     => $error_messages['number_too_small']
-					);
-					$value = $this->properties['min'];
-				} elseif ( isset( $this->properties['max'] ) && $value > $this->properties['max'] ) {
-					$errors[$this->get_slug()] = array(
-							'slug'        => $this->get_slug(),
-							'title'       => esc_html( $this->properties['label'] ),
-							'message'     => $error_messages['number_too_large']
-					);
-					$value = $this->properties['max'];
-				}
-				break;
-
-			case 'html_post':
-				$value = wp_kses_post( $value );
-				break;
-
-			case 'html_data':
-				$value = wp_kses_data( $value );
-				break;
-
-			case 'no_html':
-			default:
-				$value = sanitize_text_field( $value );
-				break;
 			}
-
+			
 			return $value;
 		}
 
