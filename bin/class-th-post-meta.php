@@ -321,7 +321,8 @@ if ( !class_exists( 'TH_Post_Meta' ) ) {
 
 		public function add_for_page_template( $visible, $meta ) {
 			global $post;
-			if ( isset($meta['page_template']) && count( $meta['page_template'] ) ) {
+			$post_type = get_current_screen()->post_type;
+			if ( 'page' === $post_type && isset($meta['page_template']) && count( $meta['page_template'] ) ) {
 				$slug    = get_page_template_slug( $post->ID );
 
 				if(empty($slug)) {
