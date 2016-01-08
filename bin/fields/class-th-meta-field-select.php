@@ -123,6 +123,7 @@ if ( !class_exists( 'TH_Meta_Field_Select' ) ) {
 				$output .= '<select ' . implode( ' ', $attributes ) . '>';
 
 				if ( isset( $this->properties['placeholder'] ) &&
+					!empty( $this->properties['placeholder'] ) &&
 					!$this->properties['select2']  &&
 					!$this->properties['multiple']
 				) {
