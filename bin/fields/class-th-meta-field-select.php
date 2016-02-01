@@ -198,8 +198,11 @@ if ( !class_exists( 'TH_Meta_Field_Select' ) ) {
 
 			// False and 0 could be valid options
 			if (
-				$this->is_required() && empty( $value ) &&
-				'false' !== $value && '0' !== $value
+				$this->is_required() && 
+				( 
+					( !is_array( $value ) && empty( $value ) && 'false' !== $value && '0' !== $value ) ||
+					( !count( $value ) || 1 == count( $value ) && empty( $value[0] ) )
+				)
 			) {
 				$errors[$this->get_slug()] = array(
 						'slug'        => $this->get_slug(),
@@ -218,11 +221,24 @@ if ( !class_exists( 'TH_Meta_Field_Select' ) ) {
 				$value = $value[0];
 			}
 
-			$valid = array_keys( $this->get_options() );
-			if ( is_array( $value ) ) {
-				foreach ( $value as $val ) {
-					if ( !in_array( $val, $valid ) ) {
-						unset( $value[$val] );
+			if ( ( !is_array( $value ) && !empty( $value ) ) || 1 == count( $value ) && !empty( $value[0] ) ) {
+				$valid = array_keys( $this->get_options() );
+				if ( is_array( $value ) ) {
+					foreach ( $value as $val ) {
+						if ( !in_array( $val, $valid ) ) {
+							unset( $value[$val] );
+							if ( !isset( $errors[$this->get_slug()] ) ) {
+								$errors[$this->get_slug()] = array(
+										'slug'        => $this->get_slug(),
+										'title'       => esc_html( $this->properties['label'] ),
+										'message'     => $error_messages['invalid_option']
+								);
+							}
+						}
+					}
+				} else {
+					if ( !in_array( $value, $valid ) ) {
+						$value = '';
 						if ( !isset( $errors[$this->get_slug()] ) ) {
 							$errors[$this->get_slug()] = array(
 									'slug'        => $this->get_slug(),
@@ -230,17 +246,6 @@ if ( !class_exists( 'TH_Meta_Field_Select' ) ) {
 									'message'     => $error_messages['invalid_option']
 							);
 						}
-					}
-				}
-			} else {
-				if ( !in_array( $value, $valid ) ) {
-					$value = '';
-					if ( !isset( $errors[$this->get_slug()] ) ) {
-						$errors[$this->get_slug()] = array(
-								'slug'        => $this->get_slug(),
-								'title'       => esc_html( $this->properties['label'] ),
-								'message'     => $error_messages['invalid_option']
-						);
 					}
 				}
 			}
