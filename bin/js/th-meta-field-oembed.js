@@ -54,7 +54,7 @@ jQuery(document).ready(function ($) {
 	});
 
     $(document).ajaxSuccess(function(event, xhr, settings) {
-        if ( settings.data.indexOf("action=add-tag") !== -1 ) {
+        if ( settings.data && settings.data.indexOf("action=add-tag") !== -1 ) {
             $('.th_remove_file_button:visible').trigger('click');
         }
     });

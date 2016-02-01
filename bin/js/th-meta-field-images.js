@@ -232,7 +232,7 @@
         });
 
         $(document).ajaxSend(function (event, jqXHR, ajaxOptions) {
-            if (ajaxOptions.data.indexOf('meta-box-order') !== -1) {
+            if (ajaxOptions.data && ajaxOptions.data.indexOf('meta-box-order') !== -1) {
                 $(".esl-additional-images-picker img").each(function () {
                     center_image_in_preview($(this));
                 });
@@ -240,7 +240,7 @@
         });
 
         $(document).ajaxSuccess(function (event, xhr, settings) {
-            if (settings.data.indexOf("action=add-tag") !== -1) {
+            if (settings.data && settings.data.indexOf("action=add-tag") !== -1) {
                 $(".esl-additional-images-container").each(function (index) {
                     var $this = $(this),
                         $empty_image = $this.find('.esl-no-image');
