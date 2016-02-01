@@ -331,7 +331,6 @@ if ( !class_exists( 'TH_Post_Meta' ) ) {
 
 				$test    = in_array($slug, $meta['page_template']);
 				$visible = $visible && $test;
-				_log($visible);
 			}
 			return $visible;
 		}
