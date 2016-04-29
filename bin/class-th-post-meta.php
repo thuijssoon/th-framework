@@ -83,6 +83,7 @@ if ( !class_exists( 'TH_Post_Meta' ) ) {
 			$this->admin_pages = array( 'post.php', 'post-new.php', 'page-new.php', 'page.php' );
 
 			add_filter( 'th_post_meta_show_on', array( $this, 'add_for_post_type' ), 10, 2 );
+			add_filter( 'th_post_meta_show_on', array( $this, 'add_for_meta' ), 10, 2 );
 			add_filter( 'th_post_meta_show_on', array( $this, 'add_for_page_template' ), 11, 2 );
 			add_action( 'mcc_copy_post_meta', array( $this, 'handle_mcc_copy_post_meta' ), 10, 5 );
 		}
@@ -331,6 +332,45 @@ if ( !class_exists( 'TH_Post_Meta' ) ) {
 
 				$test    = in_array($slug, $meta['page_template']);
 				$visible = $visible && $test;
+			}
+			return $visible;
+		}
+
+		public function add_for_meta( $visible, $meta ) {
+			global $post;
+			if ( isset( $meta['show_on_meta'] ) ) {
+				if ( is_array( $meta['show_on_meta'] ) && isset( $meta['show_on_meta']['meta_key'] ) && isset( $meta['show_on_meta']['meta_value'] ) ) {
+					$meta_value = get_post_meta( $post->ID, $meta['show_on_meta']['meta_key'], true );
+					$compare = is_array( $meta['show_on_meta']['meta_value'] ) ? 'IN' : '=';
+					$result = false;
+					if ( isset( $meta['show_on_meta']['compare'] ) && in_array( strtoupper( $meta['show_on_meta']['compare'] ), ['!=', 'IN', 'NOT IN'] ) ) {
+						$compare = strtoupper( $meta['show_on_meta']['compare'] );
+					}
+					switch ( $compare ) {
+						case '!=':
+							$result = $meta['show_on_meta']['meta_value'] != $meta_value;
+							break;
+
+						case 'IN':
+							$value = $meta['show_on_meta']['meta_value'];
+							$value = is_array( $value ) ? $value : array( $value );
+							$result = in_array($meta_value, $value);
+							break;
+
+						case 'NOT IN':
+							$value = $meta['show_on_meta']['meta_value'];
+							$value = is_array( $value ) ? $value : array( $value );
+							$result = !in_array($meta_value, $value);
+							break;
+						
+						default:
+							$result = $meta['show_on_meta']['meta_value'] == $meta_value;
+							break;
+					}
+					$visible = $visible && $result;
+				} elseif ( !is_array( $meta['show_on_meta'] ) ) {
+					$visible = $visible && get_post_meta( $post->ID, $meta['show_on_meta'], true );
+				}
 			}
 			return $visible;
 		}
