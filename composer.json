@@ -2,7 +2,7 @@
     "name": "thijshuijssoon/th-framework",
     "description": "Framework for WordPress plugin development.",
     "license": "GPL",
-	"version": "0.9.0",
+	"version": "0.9.1",
     "type": "wordpress-plugin",    
     "dist": {
         "url": "git@github.com:thuijssoon/th-framework.git",
