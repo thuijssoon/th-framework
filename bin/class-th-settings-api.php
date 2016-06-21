@@ -312,6 +312,10 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 
 
 		function show_admin_notices() {
+			$screen = get_current_screen();
+			if ( $screen->id !== $this->admin_page )
+        		return;
+
 			// collect setting errors/notices: //http://codex.wordpress.org/Function_Reference/get_settings_errors
 			$this->settings_errors = get_settings_errors();
 
@@ -748,15 +752,15 @@ if ( !class_exists( "TH_Settings_API" ) ) {
 
 			// echo out the screen icon and tabs:
 			// screen_icon();
-			// echo '<h2>' . $this->page_title . '</h2>';
-			// echo '<h3 class="nav-tab-wrapper">';
-			// echo implode( '', $links );
-			// echo '</h3>';
-
-			echo '<h2 class="nav-tab-wrapper">' . $this->page_title . '&nbsp; &nbsp;';
-			// echo '<h2>' . $this->page_title . '</h2>';
+			echo '<h2>' . $this->page_title . '</h2>';
+			echo '<h2 class="nav-tab-wrapper">';
 			echo implode( '', $links );
 			echo '</h2>';
+
+			// echo '<h2 class="nav-tab-wrapper">' . $this->page_title . '&nbsp; &nbsp;';
+			// // echo '<h2>' . $this->page_title . '</h2>';
+			// echo implode( '', $links );
+			// echo '</h2>';
 
 			return $current_tab;
 		} // end of function display_settings_page_tabs
